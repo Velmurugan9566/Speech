@@ -1,156 +1,8 @@
-/*import React, { useState } from 'react';
-import * as XLSX from 'xlsx';
-import axios from 'axios';
-
-const AdminProductForm = () => {
-  const [formData, setFormData] = useState({
-    productName: '',
-    productQuantity: '',
-    productPrice: '',
-    Subcategory: '',
-    category: '',
-    discount:'',
-    supp_id:''
-  });
-  const [errors, setErrors] = useState({});
-
-  const validate = () => {
-    let validationErrors = {};
-    
-    
-
-    if (!formData.productName) validationErrors.productName = 'Product Name is required';
-    // else{
-    //     axios.get(`http://localhost:3001/product/${formData.productName}`)
-    //     .then(msg =>console.log(msg))
-    //     .catch(err=>console.log(err))
-    // }
-    if (!formData.productQuantity || isNaN(formData.productQuantity)|| formData.productQuantity < 0 ) {
-      validationErrors.productQuantity = 'Product Quantity is required and must be a possitive number';
-    }
-    if (!formData.productPrice || isNaN(formData.productPrice) || formData.productPrice <0) {
-      validationErrors.productPrice = 'Product Price is required and must be a possitive number';
-    }
-   
-    if (!formData.category) validationErrors.category = 'Category is required';
-    if (!formData.Subcategory) validationErrors.Subcategory = ' Sub_Category is required';
-    if (!formData.supp_id) validationErrors.supp_id= 'Supplier Id is required';
-     if (!formData.discount|| isNaN(formData.discount)|| formData.discount < 0) {
-           validationErrors.discount = 'Discount is required';}
-    
-
-    return validationErrors;
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-    } else {
-      setErrors({});
-      console.log(formData);
-      axios.post('http://localhost:3001/AddPro',{formData})
-      .then(msg => console.log(msg))
-      .catch(err => console.log(err))
-      // Handle form submission (e.g., send data to backend)
-    }
-  };
-
-  const handleChange = (event) => {
-    setFormData({
-      ...formData,
-      [event.target.name]: event.target.value
-    });
-  };
-
-  const handleExcelUpload = (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-      // Validate the data
-      const isValid = jsonData.every(item => {
-        return typeof item['product quantity'] === 'number' && typeof item['product price'] === 'number';
-      });
-
-      if (!isValid) {
-        alert('Invalid data in Excel file.');
-        return;
-      }
-
-      console.log(jsonData);
-      // Handle bulk insertion (e.g., send data to backend)
-    };
-
-    reader.readAsArrayBuffer(file);
-  };
-
-  return (
-    <div>
-      <h2>Insert Product Details</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Product Name:</label>
-          <input name="productName" value={formData.productName} onChange={handleChange} />
-          {errors.productName && <span>{errors.productName}</span>}
-        </div>
-        <div>
-          <label>Product Quantity:</label>
-          <input name="productQuantity" type="number" value={formData.productQuantity} onChange={handleChange} />
-          {errors.productQuantity && <span>{errors.productQuantity}</span>}
-        </div>
-        <div>
-          <label>Product Price:</label>
-          <input name="productPrice" type="number" value={formData.productPrice} onChange={handleChange} />
-          {errors.productPrice && <span>{errors.productPrice}</span>}
-        </div>
-        <div>
-          <label>Category:</label>
-          <input name="category" value={formData.category} onChange={handleChange} />
-          {errors.category && <span>{errors.category}</span>}
-        </div>
-       
-        <div>
-          <label>Sub Category:</label>
-          <input name="Subcategory" value={formData.Subcategory} onChange={handleChange} />
-          {errors.Subcategory && <span>{errors.Subcategory}</span>}
-        </div>
-        <div>
-          <label>Supplier Name/Id:</label>
-          <input name="supp_id" value={formData.supp_id} onChange={handleChange} />
-          {errors.supp_id && <span>{errors.supp_id}</span>}
-        </div>
-        <div>
-          <label>Discount:</label>
-          <input name="discount" value={formData.discount} onChange={handleChange} />
-          {errors.discount && <span>{errors.discount}</span>}
-        </div>
-        <button type="submit">Insert Product</button>
-      </form>
-
-      <h2>Bulk Insert Products via Excel</h2>
-      <input type="file" accept=".xlsx, .xls" onChange={handleExcelUpload} />
-    </div>
-  );
-};
-
-export default AdminProductForm;
-
-*/
 import React, { useEffect, useState } from 'react';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
-import '../style/AddPro.css'; // External CSS file
-import 'bootstrap/dist/css/bootstrap.min.css'
+import Header from './AdminHead';
 import { ToastContainer, toast } from 'react-toastify';
-import "react-toastify/dist/ReactToastify.css";
 import { Link, useNavigate } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 
@@ -307,19 +159,9 @@ const AdminProductForm = () => {
 
   return (
     <div>
+      <Header/>
       <ToastContainer />
-      <header className="header">
-        <h2>Admin Panel</h2>
-        <nav>
-          <button className="active">Home</button>
-          <button>Add Product</button>
-          <button>View Transaction</button>
-          <button>View Stock</button>
-          <button>Add Supplier</button>
-          <button>Profile</button>
-        </nav>
-      </header>
-
+      
       <div className="container">
         <h2>Insert Product Details</h2>
         <form className="product-form" onSubmit={handleSubmit}>

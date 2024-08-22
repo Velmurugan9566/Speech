@@ -1,12 +1,21 @@
-import React,{useState,useEffect} from 'react';
+import React, { useEffect, useState } from 'react';
+import * as XLSX from 'xlsx';
+import axios from 'axios';
+import '../style/AddPro.css'; // External CSS file
+import Header from './AdminHead';
+import 'bootstrap/dist/css/bootstrap.min.css'
+import { ToastContainer, toast } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 import { Link, useNavigate } from 'react-router-dom';
+import Spinner from 'react-bootstrap/Spinner';
+
 
 function Dashboard(){
 
     return(
         <>
-        <h2>Admin DashBorad</h2>
-        <Link to='/DashBoard/Addproduct' >Add Product</Link>
+        <ToastContainer />
+        <Header/>
         </>
     )
 }
