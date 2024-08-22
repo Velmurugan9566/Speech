@@ -72,7 +72,10 @@ function App() {
       <header className="header">
         <h1 className="title">Vel'z Supermarket</h1>
         <div className="icons">
-          <FaUser className="icon" />
+          <FaUser className="icon" id='icon1' />
+          <div classname="submenu">
+            <Link to="/Admin">Admin</Link>
+          </div>
           <Link to="/cart">
             <FaShoppingCart className="icon" />
           </Link>
