@@ -163,6 +163,8 @@ import 'regenerator-runtime/runtime';
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import axios from "axios";
 import { jsPDF } from "jspdf";
+import Header from "./pageHeader"
+import "../style/CartStyle.css"
 
 const Cart = () => {
   const [cart, setCart] = useState([]);
@@ -417,38 +419,53 @@ const Cart = () => {
   };
 
   return (
-    <>
-      <h1 className="heading">Voice Shopping Cart</h1>
-      <div className="input_box">
-        <p className="input_box--text">{transcript}</p>
+    <div className="container">
+      <Header /> {/* Render the header component */}
+      <div className="cart-content">
+        <div className="listening-section">
+          <input type="text" value={transcript} readOnly className="transcript-box" />
+          <input type="text" placeholder="Search for products..." className="search-box" />
+        </div>
+        <div className="product-list-section">
+          <h2>Products</h2>
+          <ul className="product-list">
+            {products.map(product => (
+              <li key={product._id}>{product.proname}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="cart-section">
+          <h2>Shopping Cart</h2>
+          <ul>
+            {cart.map((item, index) => (
+              <li key={index}>
+                {item.name} - {item.quantity} @ {item.price / item.quantity} = {item.price}
+              </li>
+            ))}
+          </ul>
+          <div className="total-amount">
+            <h3>Total Amount: Rs. {cart.reduce((acc, item) => acc + item.price, 0)}</h3>
+            <button onClick={generatePDF} area-label="generate PDF">
+              Print Bill
+            </button>
+          </div>
+        </div>
+        <div className="controls">
+          <button onClick={startListening} area-label="start Listening">
+            <TiMicrophoneOutline size="20px" />
+          </button>
+          <button onClick={stopListening} area-label="stop listening">
+            <IoStopCircleOutline size="20px" />
+          </button>
+          <button onClick={downloadTranscript} area-label="download transcript">
+            <IoCloudDownloadOutline size="20px" />
+          </button>
+          <button onClick={reset} area-label="reset transcript">
+            <MdLockReset size="20px" />
+          </button>
+        </div>
       </div>
-      <div className="card">
-        <button onClick={startListening} area-label="start Listening">
-          <TiMicrophoneOutline size="20px" />
-        </button>
-        <button onClick={stopListening} area-label="stop listening">
-          <IoStopCircleOutline size="20px" />
-        </button>
-        <button onClick={downloadTranscript} area-label="download transcript">
-          <IoCloudDownloadOutline size="20px" />
-        </button>
-        <button onClick={reset} area-label="reset transcript">
-          <MdLockReset size="20px" />
-        </button>
-        <button onClick={generatePDF} area-label="generate PDF">
-          Generate PDF
-        </button>
-      </div>
-      <h2>Shopping Cart</h2>
-      <ul>
-        {cart.map((item, index) => (
-          <li key={index}>
-            {item.name} - {item.quantity} @ {item.price / item.quantity} = {item.price}
-          </li>
-        ))}
-      </ul>
-    </>
+    </div>
   );
 };
-
 export default Cart;

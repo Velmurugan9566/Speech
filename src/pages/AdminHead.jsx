@@ -11,7 +11,7 @@ function AdminHead(){
         <Link to='/DashBoard' ><button className="active">Home</button></Link>
         <Link to='/DashBoard/AddProduct' > <button>Add Product</button></Link>
           <button>View Transaction</button>
-          <Link to='/DashBoard/ViewProduct' ><button>View Stock</button></Link>
+          <Link to='/DashBoard/ViewProduct'><button>View Stock</button></Link>
           <button>Add Supplier</button>
           <button>Profile</button>
         </nav>

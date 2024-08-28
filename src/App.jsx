@@ -9,6 +9,7 @@ import Admin from "./pages/Admin.jsx";
 import AdminDash from "./pages/AdminDash.jsx";
 import Addproduct from "./pages/Addproduct.jsx";
 import ViewProducts from "./pages/ViewProduct.jsx"
+import UpdateProduct from "./pages/UpdateProduct.jsx"
 import 'regenerator-runtime/runtime';
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
          <Route path='/DashBoard' element={<AdminDash/>}></Route>
          <Route path='/DashBoard/Addproduct' element={<Addproduct/>}></Route>
          <Route path='/DashBoard/ViewProduct' element={<ViewProducts/>}></Route>
+         <Route path='/DashBoard/UpdateProudct/:id' element={<UpdateProduct/>}></Route>
       </Routes>
       </BrowserRouter>
 
