@@ -133,8 +133,8 @@ const AdminProductForm = () => {
 
   const handleExcelUpload = (event) => {
     const file = event.target.files[0];
+    console.log(file)
     const reader = new FileReader();
-
     reader.onload = (e) => {
       const data = new Uint8Array(e.target.result);
       const workbook = XLSX.read(data, { type: 'array' });
@@ -143,7 +143,8 @@ const AdminProductForm = () => {
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
       const isValid = jsonData.every(item => {
-        return typeof item['product quantity'] === 'number' && typeof item['product price'] === 'number';
+        
+        return typeof item['quantity'] === 'number' && typeof item['price'] === 'number';
       });
 
       if (!isValid) {
@@ -261,9 +262,9 @@ const AdminProductForm = () => {
         </div>
       )}
 
-      <footer className="footer">
+      {/* <footer className="footer">
         <p>© 2024 Admin Panel. All rights reserved.</p>
-      </footer>
+      </footer> */}
     </div>
   );
 };

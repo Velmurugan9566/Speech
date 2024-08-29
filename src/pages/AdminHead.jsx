@@ -1,5 +1,5 @@
-import '../style/AddPro.css'; // External CSS file
-import 'bootstrap/dist/css/bootstrap.min.css'
+ // External CSS file
+//import 'bootstrap/dist/css/bootstrap.min.css'
 import { Link, useNavigate } from 'react-router-dom';
 import "react-toastify/dist/ReactToastify.css";
 function AdminHead(){

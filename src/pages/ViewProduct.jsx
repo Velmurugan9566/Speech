@@ -1,11 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import Header from './AdminHead';
-import '../style/ViewProducts.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+//import '../style/ViewProducts.css';
+import 'primereact/resources/themes/saga-blue/theme.css';  // Choose your preferred theme
+//import 'primereact/resources/primereact.min.css';           // Core CSS
+import 'primeicons/primeicons.css';    
+//import 'bootstrap/dist/css/bootstrap.min.css';
 import { ToastContainer, toast } from 'react-toastify';
 import {Link} from "react-router-dom"
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { Toast } from 'primereact/toast';
+import { Button } from 'primereact/button';
 
 const ViewProducts = () => {
   const { state } = useLocation();
@@ -14,6 +20,7 @@ const ViewProducts = () => {
   const [selectedCategory, setSelectedCategory] = useState(state?.selectedCategory || null);
   const [renameMode, setRenameMode] = useState(null); // Track the category being renamed
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [delcat, setdelcat] = useState('')
 
   useEffect(() => {
     axios.get('http://localhost:3001/categorieswithcount')
@@ -71,7 +78,26 @@ const handleDeleteSelected = () => {
       .catch(err => toast.error("Error fetching products:", err));
   };
    console.log(products)
-  
+  const handleDeleteCate =(catename) =>{
+    
+  };
+  const [visible, setVisible] = useState(false);
+    const toast = useRef(null);
+    const accept = () => {
+      console.log(delcat)
+      axios.delete('http://localhost:3001/deleteCategory', {data:{category:delcat}})
+      .then((msg) => {
+        toast.current.show({ severity: 'success', summary: 'Success', detail: 'Category and Product Deleted Successfully', life: 3000 });
+        axios.get('http://localhost:3001/categorieswithcount')
+        .then(res => setCategories(res.data))
+        .catch(err => toast.error("Error fetching categories:", err));
+      })
+      .catch(err => toast.error("Error deleting products"));
+        
+    }
+    const reject = () => {
+        toast.current.show({ severity: 'warn', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+    }
 
   return (
     <div>
@@ -80,31 +106,40 @@ const handleDeleteSelected = () => {
 
       <div className="container">
         <h2>Available Categories</h2>
-        <ul>
-          {categories.map((category, index) => (
-            <li key={index}>
+        <table>
+          { categories.length>0 ?
+          categories.map((category, index) => (
+            <tbody key={index}>
               {renameMode === category.category ? (
-                <div>
-                  <input
+                <tr key={index}>
+                  <td><input
                     type="text"
                     placeholder={category.category}
                     value={newCategoryName}
                     onChange={(e) => setNewCategoryName(e.target.value)}
-                  />
-                  <button onClick={() => handleRenameCategory(category.category)}>Rename</button>
-                  <button onClick={() => setRenameMode(null)}>Cancel</button>
-                </div>
+                  /></td>
+                 <td><button onClick={() => handleRenameCategory(category.category)}>Rename</button></td>
+                 <td> <button onClick={() => setRenameMode(null)}>Cancel</button></td>
+                </tr>
               ) : (
-                <div>
-                  <span onClick={() => handleCategoryClick(category.category)}>
+                <tr>
+                  <td><span onClick={() => handleCategoryClick(category.category)}>
                     {category.category} ({category.productCount})
-                  </span>
-                  <button onClick={() => setRenameMode(category.category)}>Rename</button>
-                </div>
+                  </span></td>
+                 <td> <button onClick={() => setRenameMode(category.category)}>Rename</button></td>
+                 <td>
+            <Toast ref={toast} />
+            <ConfirmDialog group="templating"  visible={visible} onHide={() => setVisible(false)} message="Are you sure you want to proceed?" 
+                header="Confirmation" icon="pi pi-exclamation-triangle" accept={()=>accept()} reject={reject} />
+            <div className="card flex justify-content-center">
+                <Button onClick={() => {setVisible(true),setdelcat(category.category)}} icon="pi pi-check" label="Confirm" />
+                      </div>
+                 </td>
+                </tr>
               )}
-            </li>
-          ))}
-        </ul>
+            </tbody>
+          )):<tbody><tr><td>No Categories are Available</td></tr></tbody>}
+        </table>
 
 
       {selectedCategory && (
