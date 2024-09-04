@@ -78,7 +78,16 @@ const AdminProductForm = () => {
       setErrors({});
       console.log(formData);
       axios.post('http://localhost:3001/AddPro', { formData })
-        .then(msg => toast.success("Product Added Successfully"))
+        .then(msg => {
+              if(msg.data.status == 1){
+                toast.success("Product Added Successfully")
+              }
+              else if(msg.data.status == 2){
+                toast.info("Product Already Exist")
+              }else{
+                toast.warning(msg.data)
+              }
+              })
         .catch(err => toast.error(err));
     }
   };
@@ -150,8 +159,23 @@ const AdminProductForm = () => {
       if (!isValid) {
         alert('Invalid data in Excel file.');
         return;
+      }else{
+        axios.post('http://localhost:3001/AddBulkPro',{jsonData})
+        .then(msg=>{
+             if(msg.data.status==1){
+              toast.success("All products are inserted Successfully.")
+             }else if(msg.data.status==2){
+              toast.warning("duplicate data are there..")
+              console.log(msg.data.data)
+             }else if(msg.data.status==3){
+                toast.warning("Data has invalid format")
+                console.log(msg.data.err)
+              toast.warning(msg.data)
+             }
+              
+        })
+       .catch(err=>console.log(err))
       }
-
       console.log(jsonData);
     };
 
@@ -230,6 +254,7 @@ const AdminProductForm = () => {
 
         <h2>Bulk Insert Products via Excel</h2>
         <input type="file" accept=".xlsx, .xls" onClick={(e) => e.stopPropagation()} onChange={handleExcelUpload} />
+        <button onClick={handleExcelUpload} >Add</button>
       </div>
 
       {showCategoryPopup && (

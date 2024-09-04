@@ -90,9 +90,9 @@ const handleDeleteSelected = () => {
         toast.current.show({ severity: 'success', summary: 'Success', detail: 'Category and Product Deleted Successfully', life: 3000 });
         axios.get('http://localhost:3001/categorieswithcount')
         .then(res => setCategories(res.data))
-        .catch(err => toast.error("Error fetching categories:", err));
+        .catch(err =>{ toast.error("Error fetching categories:")});
       })
-      .catch(err => toast.error("Error deleting products"));
+      .catch(err =>{ toast.error("Error deleting products")});
         
     }
     const reject = () => {

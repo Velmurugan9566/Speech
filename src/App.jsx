@@ -12,6 +12,7 @@ import Addproduct from "./pages/Addproduct.jsx";
 import ViewProducts from "./pages/ViewProduct.jsx"
 import UpdateProduct from "./pages/UpdateProduct.jsx"
 import 'regenerator-runtime/runtime';
+import Registration from "./pages/Regustratuin.jsx"
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
          <Route path='/cart' element={<Cart/>}></Route>
          <Route path='/' element={<Home/>} ></Route>
          <Route path='/Admin' element={<Admin/>} ></Route>
+         <Route path='/Registration'element={<Registration/>}></Route>
          <Route path='/DashBoard' element={<AdminDash/>}></Route>
          <Route path='/DashBoard/Addproduct' element={<Addproduct/>}></Route>
          <Route path='/DashBoard/ViewProduct' element={<ViewProducts/>}></Route>

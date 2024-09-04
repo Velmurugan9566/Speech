@@ -1,22 +1,35 @@
- // External CSS file
-//import 'bootstrap/dist/css/bootstrap.min.css'
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import "react-toastify/dist/ReactToastify.css";
-function AdminHead(){
+import '../style/AdminHeader.css'; // Ensure this CSS file is included in your project
 
-    return(
-        <header className="header">
-        <h2>Admin Panel</h2>
-        <nav>
-        <Link to='/DashBoard' ><button className="active">Home</button></Link>
-        <Link to='/DashBoard/AddProduct' > <button>Add Product</button></Link>
-          <button>View Transaction</button>
-          <Link to='/DashBoard/ViewProduct'><button>View Stock</button></Link>
-          <button>Add Supplier</button>
-          <button>Profile</button>
-        </nav>
-      </header>
-    );
-};
+function AdminHead() {
+  return (
+    <header className="admin-header">
+      <div className="title-row">
+        <h2 className="admin-title">Admin Panel</h2>
+        <Link to='/profile' className="profile-link">
+          <button className='profile-btn'>Profile</button>
+        </Link>
+        <div className="admin-menu">
+                        <Link to="/profile">Profile Settings</Link>
+                        <Link to="/logout">Logout</Link>
+                    </div>
+      </div>
+      <nav className="menu-row">
+        <Link to='/DashBoard'>
+          <button>Home</button>
+        </Link>
+        <Link to='/DashBoard/AddProduct'>
+          <button>Add Product</button>
+        </Link>
+        <button>View Transaction</button>
+        <Link to='/DashBoard/ViewProduct'>
+          <button>View Stock</button>
+        </Link>
+        <button>Add Supplier</button>
+      </nav>
+    </header>
+  );
+}
 
 export default AdminHead;

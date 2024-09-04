@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import './home.css';
+
 import { Link, useNavigate } from 'react-router-dom';
 import 'regenerator-runtime/runtime';
 import { FaUser, FaShoppingCart } from 'react-icons/fa';
-
+import Header from './UserHeader.jsx'
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 
 
 function App() {
   const navigate = useNavigate();
   const [mode, setMode] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+
 
   const startListening = () => {
     resetTranscript();
     SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
     speak("Select the Choice Exploring or Purchasing");
+    setIsListening(true)
   }
 
-  const stopListening = () => SpeechRecognition.stopListening();
+  const stopListening = () => {SpeechRecognition.stopListening(); setIsListening(false)};
   
   const {
     transcript,
@@ -34,11 +37,20 @@ function App() {
     return () => clearTimeout(timer);
   }, [transcript]);
 
+  useEffect(() => {
+    // Stop speaking when the component unmounts (e.g., navigating to a new page)
+    return () => {
+      speechSynthesis.cancel();
+    };
+  }, []);
+
   if (!browserSupportsSpeechRecognition) {
     return <span>Browser doesn't support speech recognition.</span>;
   }
 
   const speak = (text) => {
+    // Stop any ongoing speech before starting a new one
+    speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     speechSynthesis.speak(utterance);
   };
@@ -69,19 +81,11 @@ function App() {
 
   return (
     <div className="app-container">
-      <header className="header">
-        <h1 className="title">Vel'z Supermarket</h1>
-        <div className="icons">
-          <FaUser className="icon" id='icon1' />
-          <div classname="submenu">
-            <Link to="/Admin">Admin</Link>
-          </div>
-          <Link to="/cart">
-            <FaShoppingCart className="icon" />
-          </Link>
-        </div>
-      </header>
-
+     <Header
+        isListening={isListening}
+        startListening={startListening}
+        stopListening={stopListening}
+      />
       <main className="main-content">
         <p>{transcript}</p>
         <button className="btn explore-btn" onClick={() => nav("explore")}>Explore</button>

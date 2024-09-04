@@ -163,8 +163,8 @@ import 'regenerator-runtime/runtime';
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import axios from "axios";
 import { jsPDF } from "jspdf";
-import Header from "./pageHeader"
 import "../style/CartStyle.css"
+import Header from './UserHeader'
 
 const Cart = () => {
   const [cart, setCart] = useState([]);
@@ -174,14 +174,16 @@ const Cart = () => {
   const [waitingForProductName, setWaitingForProductName] = useState(false);
   const [products, setProducts] = useState([]);
   const [command, setCommand] = useState("");
-
+  const [isListening, setIsListening] = useState(false);
   const startListening = () => {
     resetTranscript();
+    setIsListening(true)
     SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
     speak("Please say the product name.");
   };
 
   const stopListening = () => {
+    setIsListening(false)
     SpeechRecognition.stopListening();
     speak("Stopped listening.");
   };
@@ -273,7 +275,12 @@ const Cart = () => {
   if (!browserSupportsSpeechRecognition) {
     return <span>Browser doesn't support speech recognition.</span>;
   }
-
+  useEffect(() => {
+    // Stop speaking when the component unmounts (e.g., navigating to a new page)
+    return () => {
+      speechSynthesis.cancel();
+    };
+  }, []);
   const downloadTranscript = () => {
     const element = document.createElement('a');
     const file = new Blob([transcript], { type: 'text/plain' });
@@ -419,9 +426,13 @@ const Cart = () => {
   };
 
   return (
-    <div className="container">
-      <Header /> {/* Render the header component */}
-      <div className="cart-content">
+    <div className="main-container">
+      <Header
+        isListening={isListening}
+        startListening={startListening}
+        stopListening={stopListening}
+      />
+      <div className="container">
         <div className="listening-section">
           <input type="text" value={transcript} readOnly className="transcript-box" />
           <input type="text" placeholder="Search for products..." className="search-box" />
@@ -434,15 +445,34 @@ const Cart = () => {
             ))}
           </ul>
         </div>
-        <div className="cart-section">
+        <div>
           <h2>Shopping Cart</h2>
-          <ul>
-            {cart.map((item, index) => (
-              <li key={index}>
-                {item.name} - {item.quantity} @ {item.price / item.quantity} = {item.price}
-              </li>
+          <table cellPadding={10} >
+            <thead>
+             <tr><td>S.No.</td>
+             <td>Product Name</td>
+             <td>Quantity</td>
+             <td>Discount</td>
+             <td>Price</td>
+             <td>Total</td>
+             </tr>
+              </thead>
+              <tbody>
+
+              {cart.map((item, index) => (
+                 
+                <tr>
+                  
+                <td>{index}</td>
+                <td>{item.name}</td>
+                <td>{item.quantity}</td>
+                <td>{item.discount} </td>
+                <td>{item.price} </td>
+                <td>{item.discount >0 ? item.quantity * (item.discount * item.price) :item.quantity * item.price } </td>
+              </tr>
             ))}
-          </ul>
+                </tbody>
+          </table>
           <div className="total-amount">
             <h3>Total Amount: Rs. {cart.reduce((acc, item) => acc + item.price, 0)}</h3>
             <button onClick={generatePDF} area-label="generate PDF">
