@@ -339,11 +339,14 @@ const addToCart = (product, quantity) => {
   const discountedPrice = product.price * (1 - product.discount / 100);
   const additionalPrice = discountedPrice * quantity;
   const existingProductIndex = cart.findIndex(item => item._id === product._id);
-
+  
   if (existingProductIndex >= 0) {
     const updatedCart = [...cart];
     const existingProduct = updatedCart[existingProductIndex];
-
+    if(existingProduct.quantity +quantity > product.quantity){
+      speak('Product out of stock');
+      return;
+    }
     existingProduct.quantity += quantity;
     existingProduct.totalPrice = (parseFloat(existingProduct.totalPrice) + additionalPrice).toFixed(2);
     
@@ -598,7 +601,7 @@ const addToCart = (product, quantity) => {
     const discountedPrice = price * (1 - discount / 100);
     return (discountedPrice * quantity).toFixed(2);
   };
-
+console.log(cart)
   return (
       <div className="main-container">
         <Header

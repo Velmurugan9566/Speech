@@ -155,19 +155,17 @@ function Cart() {
 export default Cart;
 */
 import React, { useState, useEffect } from "react";
-import { IoCloudDownloadOutline } from "react-icons/io5";
-import { TiMicrophoneOutline } from "react-icons/ti";
-import { IoStopCircleOutline } from "react-icons/io5";
-import { MdLockReset } from "react-icons/md";
 import 'regenerator-runtime/runtime';
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import axios from "axios";
 import { jsPDF } from "jspdf";
+import 'jspdf-autotable';
 import "../style/CartStyle.css"
 import Header from './UserHeader'
 
 const Cart = () => {
-  const [cart, setCart] = useState([]);
+  //const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem('cart')) || []);
   const [listeningForProduct, setListeningForProduct] = useState(true);
   const [currentProduct, setCurrentProduct] = useState("");
   const [waitingForQuantity, setWaitingForQuantity] = useState(false);
@@ -186,6 +184,7 @@ const Cart = () => {
     setIsListening(false)
     SpeechRecognition.stopListening();
     speak("Stopped listening.");
+    speechSynthesis.cancel();
   };
 
   const {
@@ -278,17 +277,9 @@ const Cart = () => {
   useEffect(() => {
     // Stop speaking when the component unmounts (e.g., navigating to a new page)
     return () => {
-      speechSynthesis.cancel();
+      //speechSynthesis.cancel();
     };
   }, []);
-  const downloadTranscript = () => {
-    const element = document.createElement('a');
-    const file = new Blob([transcript], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    element.download = 'transcript.txt';
-    document.body.appendChild(element); // Required for this to work in FireFox
-    element.click();
-  };
 
   const reset = () => {
     resetTranscript();
@@ -299,6 +290,7 @@ const Cart = () => {
   const speak = (text) => {
     const utterance = new SpeechSynthesisUtterance(text);
     speechSynthesis.speak(utterance);
+    //speechSynthesis.cancel();
   };
 
   const handleProductInput = async (input) => {
@@ -320,53 +312,56 @@ const Cart = () => {
     }
   };
 
-  const addToCart = async (productName, quantity) => {
-    try {
-      const response = await axios.get(`http://localhost:3001/product/${productName}`);
-      const product = response.data;
-      const parsedQuantity = parseInt(quantity);
+  // const addToCart = async (productName, quantity) => {
+  //   try {
+  //     const response = await axios.get(`http://localhost:3001/product/${productName}`);
+  //     const product = response.data;
+  //     const parsedQuantity = parseInt(quantity);
 
-      if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
-        speak("Invalid quantity. Please try again.");
-        return;
-      }
+  //     if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
+  //       speak("Invalid quantity. Please try again.");
+  //       return;
+  //     }
 
-      if (parsedQuantity > product.quantity) {
-        speak(`Only ${product.quantity} of ${product.proname} available. Please try again.`);
-        return;
-      }
+  //     if (parsedQuantity > product.quantity) {
+  //       speak(`Only ${product.quantity} of ${product.proname} available. Please try again.`);
+  //       return;
+  //     }
 
-      setCart((prevCart) => [...prevCart, { name: product.proname, quantity: parsedQuantity, price: product.price * parsedQuantity }]);
-      speak(`Added ${parsedQuantity} of ${product.proname} to cart. Please say the next product name.`);
-    } catch (error) {
-      speak("Error adding product to cart. Please try again.");
-      console.error("Error adding product to cart:", error);
-    }
-  };
+  //     setCart((prevCart) => [...prevCart, { name: product.proname, quantity: parsedQuantity, price: product.price * parsedQuantity }]);
+  //     speak(`Added ${parsedQuantity} of ${product.proname} to cart. Please say the next product name.`);
+  //   } catch (error) {
+  //     speak("Error adding product to cart. Please try again.");
+  //     console.error("Error adding product to cart:", error);
+  //   }
+  // };
+// Voice command handling for removing product
+const handleRemoveProduct = async (input) => {
+  const productName = input.trim().toLowerCase();
+  
+  // Filter only the products with a valid 'name' property
+  const matchedProducts = cart.filter(p => p.proname && p.proname.toLowerCase().includes(productName));
 
-  const handleRemoveProduct = async (input) => {
-    const productName = input.trim().toLowerCase();
-    const matchedProducts = cart.filter(p => p.name.toLowerCase().includes(productName));
+  if (matchedProducts.length === 1) {
+    // Remove the matched product from the cart
+    const updatedCart = cart.filter(item => item.proname && item.proname.toLowerCase() !== matchedProducts[0].proname.toLowerCase());
+    setCart(updatedCart);
+    speak(`Removed ${matchedProducts[0].proname} from the cart.`);
+    resetTranscript();
+    setWaitingForProductName(false); // Go back to product listening
+  } else if (matchedProducts.length > 1) {
+    speak(`Multiple products found in the cart: ${matchedProducts.map(p => p.proname).join(", ")}. Please say the full product name.`);
+    resetTranscript();
+  } else {
+    speak("Product not found in the cart. Please say the product name again.");
+    resetTranscript();
+  }
+};
 
-    if (matchedProducts.length === 1) {
-      const updatedCart = cart.filter(item => item.name.toLowerCase() !== matchedProducts[0].name.toLowerCase());
-      setCart(updatedCart);
-      speak(`Removed ${matchedProducts[0].name} from the cart.`);
-      setCommand("");
-      setWaitingForProductName(false);
-      resetTranscript();
-    } else if (matchedProducts.length > 1) {
-      speak(`Multiple products found in cart: ${matchedProducts.map(p => p.name).join(", ")}. Please say the full product name.`);
-      resetTranscript();
-    } else {
-      speak("Product not found in the cart. Please say the product name again.");
-      resetTranscript();
-    }
-  };
 
   const updateCartQuantity = async (input, quantity) => {
     const productName = input.trim().toLowerCase();
-    const matchedProducts = cart.filter(p => p.name.toLowerCase().includes(productName));
+    const matchedProducts = cart.filter(p => p.proname.toLowerCase().includes(productName));
 
     if (matchedProducts.length === 1) {
       const response = await axios.get(`http://localhost:3001/product/${matchedProducts[0]._id}`);
@@ -384,7 +379,7 @@ const Cart = () => {
       }
 
       const updatedCart = cart.map(item => {
-        if (item.name.toLowerCase() === matchedProducts[0].name.toLowerCase()) {
+        if (item.proname.toLowerCase() === matchedProducts[0].proname.toLowerCase()) {
           return { ...item, quantity: parsedQuantity, price: product.price * parsedQuantity };
         }
         return item;
@@ -396,7 +391,7 @@ const Cart = () => {
       setWaitingForProductName(false);
       resetTranscript();
     } else if (matchedProducts.length > 1) {
-      speak(`Multiple products found in cart: ${matchedProducts.map(p => p.name).join(", ")}. Please say the full product name.`);
+      speak(`Multiple products found in cart: ${matchedProducts.map(p => p.proname).join(", ")}. Please say the full product name.`);
       resetTranscript();
     } else {
       speak("Product not found in the cart. Please say the product name again.");
@@ -404,26 +399,144 @@ const Cart = () => {
     }
   };
 
-  const generatePDF = () => {
-    const doc = new jsPDF();
+ // Import autoTable plugin
 
-    doc.text("Shopping Cart", 20, 10);
-    let y = 20;
-    let totalPrice = 0;
+const generatePDF = () => {
+  const doc = new jsPDF();
 
-    cart.forEach(item => {
-      doc.text(`Product: ${item.name}`, 20, y);
-      doc.text(`Price: ${item.price / item.quantity}`, 20, y + 10);
-      doc.text(`Quantity: ${item.quantity}`, 20, y + 20);
-      doc.text(`Total: ${item.price}`, 20, y + 30);
-      y += 40;
-      totalPrice += item.price;
-    });
+  // Title
+  doc.setFontSize(18);
+  doc.text("Shopping Cart Bill", doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
 
-    doc.text(`Total Price: ${totalPrice}`, 20, y);
+  // Date and Time
+  const currentDate = new Date().toLocaleString();
+  doc.setFontSize(12);
+  doc.text(`Date: ${currentDate}`, 10, 30); // Left aligned
 
-    doc.save("shopping_cart.pdf");
+  // Table headers
+  const headers = [["S.No.", "Product Name", "Quantity", "Price", "Total"]];
+
+  // Table body (product details)
+  const data = cart.map((item, index) => [
+    index + 1,
+    item.proname,
+    item.quantity,
+    parseFloat(item.price).toFixed(2), // Ensure price is a number
+    parseFloat(item.totalPrice || 0).toFixed(2) // Ensure totalPrice is a number and fallback to 0 if undefined
+  ]);
+
+  // Draw the table
+  doc.autoTable({
+    head: headers,
+    body: data,
+    startY: 40, // Start after the Date
+    theme: 'grid', // Adds borders around the cells
+    styles: {
+      halign: 'center', // Center align text
+      cellPadding: 3,
+    },
+    headStyles: { fillColor: [71, 103, 154] }, // Header background color
+    bodyStyles: { valign: 'middle' }, // Vertically align text to the middle
+    columnStyles: {
+      0: { cellWidth: 15 },  // S.No.
+      1: { cellWidth: 80 },  // Product Name
+      2: { cellWidth: 30 },  // Quantity
+      3: { cellWidth: 30 },  // Price
+      4: { cellWidth: 30 },  // Total Price
+    },
+  });
+
+  // Calculate total price
+  const totalPrice = cart.reduce((acc, item) => acc + parseFloat(item.totalPrice || 0), 0).toFixed(2);
+
+  // Add total amount at the end of the table
+  const finalY = doc.lastAutoTable.finalY + 10; // Position after the table
+  doc.setFontSize(14);
+  doc.text(`Total Amount: Rs. ${totalPrice}`, 10, finalY);
+
+  // Add footer (thank you message)
+  const pageHeight = doc.internal.pageSize.height;
+  doc.setFontSize(12);
+  doc.text("Thank you for purchasing!", doc.internal.pageSize.getWidth() / 2, pageHeight - 10, { align: 'center' });
+
+  // Save the PDF
+  doc.save("shopping-cart-bill.pdf");
+};
+
+    
+  const addToCart = (productName, quantity) => {
+    const response = axios.get(`http://localhost:3001/product/${productName}`);
+      const product = response.data;
+      const parsedQuantity = parseInt(quantity);
+
+      if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
+        speak("Invalid quantity. Please try again.");
+        return;
+      }
+
+      if (parsedQuantity > product.quantity) {
+        speak(`Only ${product.quantity} of ${product.proname} available. Please try again.`);
+        return;
+      }
+
+    const discountedPrice = product.price * (1 - product.discount / 100); // Apply discount
+    const additionalPrice = discountedPrice * quantity;
+    const existingProductIndex = cart.findIndex(item => item._id === product._id); // Check if product already exists in cart
+  
+    if (existingProductIndex >= 0) {
+      const updatedCart = [...cart];
+      const existingProduct = updatedCart[existingProductIndex];
+  
+      // Check if adding more exceeds available quantity
+      if (existingProduct.quantity + quantity > product.quantity) {
+        speak('Product out of stock');
+        return;
+      }
+  
+      // Update quantity and total price
+      existingProduct.quantity += quantity;
+      existingProduct.totalPrice = (parseFloat(existingProduct.totalPrice) + additionalPrice).toFixed(2);
+  
+      updatedCart[existingProductIndex] = existingProduct;
+  
+      setCart(updatedCart);
+  
+      speak(`${quantity} more of ${product.proname} has been added to your cart. Total quantity is now ${existingProduct.quantity}.`);
+    } else {
+      // Add product to cart if not already in
+      const cartItem = { 
+        ...product, 
+        quantity, 
+        totalPrice: additionalPrice.toFixed(2) 
+      };
+  
+      setCart([...cart, cartItem]);
+  
+      speak(`${quantity} of ${product.proname} has been added to your cart with a total price of $${cartItem.totalPrice}.`);
+    }
   };
+  
+const [quantities, setQuantities] = useState({});
+const handleQuantityChange = (productId, change) => {
+  setQuantities((prevQuantities) => {
+    const newQuantity = (prevQuantities[productId] || 1) + change;
+    const product = products.find(p => p._id === productId);
+    
+    if (!product) return prevQuantities; // Ensure the product exists
+
+    return {
+      ...prevQuantities,
+      [productId]: Math.max(1, Math.min(newQuantity, product.quantity)), // Ensure quantity doesn't exceed available stock
+    };
+  });
+};
+
+// Function to calculate the total price per product
+const calculateTotalPrice = (price, discount, quantity) => {
+  const discountedPrice = price * (1 - discount / 100);
+  return (discountedPrice * quantity).toFixed(2);
+};
+
 
   return (
     <div className="main-container">
@@ -440,60 +553,49 @@ const Cart = () => {
         <div className="product-list-section">
           <h2>Products</h2>
           <ul className="product-list">
-            {products.map(product => (
-              <li key={product._id}>{product.proname}</li>
+            {products.map((product,index) => (
+              <li key={index}>{product.proname}</li>
             ))}
           </ul>
-        </div>
-        <div>
-          <h2>Shopping Cart</h2>
-          <table cellPadding={10} >
-            <thead>
-             <tr><td>S.No.</td>
-             <td>Product Name</td>
-             <td>Quantity</td>
-             <td>Discount</td>
-             <td>Price</td>
-             <td>Total</td>
-             </tr>
-              </thead>
-              <tbody>
-
-              {cart.map((item, index) => (
-                 
-                <tr>
-                  
-                <td>{index}</td>
-                <td>{item.name}</td>
-                <td>{item.quantity}</td>
-                <td>{item.discount} </td>
-                <td>{item.price} </td>
-                <td>{item.discount >0 ? item.quantity * (item.discount * item.price) :item.quantity * item.price } </td>
-              </tr>
-            ))}
-                </tbody>
-          </table>
-          <div className="total-amount">
-            <h3>Total Amount: Rs. {cart.reduce((acc, item) => acc + item.price, 0)}</h3>
-            <button onClick={generatePDF} area-label="generate PDF">
-              Print Bill
-            </button>
-          </div>
-        </div>
-        <div className="controls">
-          <button onClick={startListening} area-label="start Listening">
-            <TiMicrophoneOutline size="20px" />
-          </button>
-          <button onClick={stopListening} area-label="stop listening">
-            <IoStopCircleOutline size="20px" />
-          </button>
-          <button onClick={downloadTranscript} area-label="download transcript">
-            <IoCloudDownloadOutline size="20px" />
-          </button>
-          <button onClick={reset} area-label="reset transcript">
-            <MdLockReset size="20px" />
-          </button>
-        </div>
+        </div><div>
+  <h2>Shopping Cart</h2>
+  <table cellPadding={10}>
+    <thead>
+      <tr>
+        <td>S.No.</td>
+        <td>Product Name</td>
+        <td>Quantity</td>
+        <td>Discount</td>
+        <td>Per Price</td>
+        <td>Total Price</td>
+      </tr>
+    </thead>
+    <tbody>
+      {cart.map((item, index) => (
+        <tr key={index}>
+          <td>{index + 1}</td>
+          <td>{item.proname}</td>
+          <td>
+            <button onClick={() => handleQuantityChange(item._id, -1)}>-</button>
+            {quantities[item._id] || item.quantity}
+            <button onClick={() => handleQuantityChange(item._id, 1)}>+</button>
+          </td>
+          <td>{item.discount}%</td>
+          <td>{item.price}</td>
+          <td>
+            {calculateTotalPrice(item.price, item.discount, quantities[item._id] || item.quantity)}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <div className="total-amount">
+    <h3>Total Amount: Rs. {cart.reduce((acc, item) => acc + parseFloat(item.totalPrice), 0)}</h3>
+    <button onClick={generatePDF} area-label="generate PDF">
+      Print Bill
+    </button>
+  </div>
+</div>
       </div>
     </div>
   );
