@@ -13,6 +13,7 @@
     "axios": "^1.7.2",
     "bootstrap": "^5.3.3",
     "formik": "^2.4.6",
+    "jquery": "^3.7.1",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.3",
     "primeicons": "^7.0.0",
@@ -25,6 +26,7 @@
     "react-speech-recognition": "^3.10.0",
     "react-toastify": "^10.0.5",
     "regenerator-runtime": "^0.14.1",
+    "slick-carousel": "^1.8.1",
     "xlsx": "^0.18.5",
     "yup": "^1.4.0"
   },

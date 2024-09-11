@@ -468,12 +468,12 @@ const generatePDF = () => {
     const response = axios.get(`http://localhost:3001/product/${productName}`);
       const product = response.data;
       const parsedQuantity = parseInt(quantity);
-
+      
       if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
         speak("Invalid quantity. Please try again.");
         return;
       }
-
+      
       if (parsedQuantity > product.quantity) {
         speak(`Only ${product.quantity} of ${product.proname} available. Please try again.`);
         return;

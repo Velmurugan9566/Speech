@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import './App.css'
+
 import axios from 'axios'
 
 import { BrowserRouter,Route,Routes} from 'react-router-dom';
