@@ -186,7 +186,7 @@ const AdminProductForm = () => {
     <div>
       <Header/>
       <ToastContainer />
-      
+      <main>
       <div className="container">
         <h2>Insert Product Details</h2>
         <form className="product-form" onSubmit={handleSubmit}>
@@ -254,7 +254,7 @@ const AdminProductForm = () => {
 
         <h2>Bulk Insert Products via Excel</h2>
         <input type="file" accept=".xlsx, .xls" onClick={(e) => e.stopPropagation()} onChange={handleExcelUpload} />
-        <button onClick={handleExcelUpload} >Add</button>
+        <button onClick={handleExcelUpload} className='add-pro-btn'>Add</button>
       </div>
 
       {showCategoryPopup && (
@@ -286,10 +286,11 @@ const AdminProductForm = () => {
           <button className="close-popup" onClick={() => setShowSupplierPopup(false)}>Close</button>
         </div>
       )}
-
+</main>
       {/* <footer className="footer">
         <p>© 2024 Admin Panel. All rights reserved.</p>
       </footer> */}
+
     </div>
   );
 };

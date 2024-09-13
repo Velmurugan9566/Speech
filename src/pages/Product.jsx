@@ -269,6 +269,7 @@ import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognitio
 import Header from './UserHeader'
 import '../style/Productpage.css'
 import { Link, useNavigate } from 'react-router-dom';
+import { FaUser, FaShoppingCart,FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
 
 function App() {
   const [categories, setCategories] = useState([]);
@@ -601,106 +602,135 @@ const addToCart = (product, quantity) => {
     const discountedPrice = price * (1 - discount / 100);
     return (discountedPrice * quantity).toFixed(2);
   };
+  const sidebar = document.querySelector('.pro-sidebar');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+  
 console.log(cart)
   return (
-      <div className="main-container">
+  <div>
         <Header
           isListening={isListening}
           startListening={startListening}
           stopListening={stopListening}
         />
-          <div className="transcript-box">
-          <p>{transcript}</p>
-          </div>
-        <div className="content">
-          <h2 className="section-title">Product Categories</h2>
+        <div className='pro-main-container'>
+    <button onClick={toggleSidebar} className='pro-toggle-btn'>X</button>
+
+   <div className={`pro-sidebar ${sidebarOpen ? 'show' : ''}`}>
+  <button className="pro-sidebar-close-btn" onClick={toggleSidebar}>X</button>
+  <h3>Current Step: {currentStep}</h3>
+  <ul>
+    {currentStep === "category" && categories.map((category) => (
+      <li key={category}>{category}</li>
+    ))}
+    {currentStep === "subcategory" && subcategories.map((subcategory) => (
+      <li key={subcategory}>{subcategory}</li>
+    ))}
+    {currentStep === "product" && products.map((product) => (
+      <li key={product._id}>{product.proname}</li>
+    ))}
+  </ul>
+</div>
+
+  
+  <div className="pro-content">
+    {/* Your existing content code goes here */}
+  
+    <div className="hp-textbox"> <input type='text' className='textp' placeholder='Tell Explore or Order...' value={transcript}></input><div className='svg'><FaMicrophone /></div> </div>
+         
+        <div className="oro-content">
+          
           {currentStep === "category" && (
-            <ul className="category-list">
-              {categories.map((category) => (
-                <li
-                  key={category}
-                  className="category-item"
-                  onClick={() => {
-                    setSelectedCategory(category);
-                    fetchSubcategories(category);
-                    setCurrentStep("subcategory");
-                  }}
-                >
-                  {category}
-                </li>
-              ))}
-            </ul>
+            <><h2 className="pro-section-title">Product Categories</h2>
+            <ul className="pro-category-list">
+                {categories.map((category) => (
+                  <li
+                    key={category}
+                    className="pro-category-item"
+                    onClick={() => {
+                      setSelectedCategory(category);
+                      fetchSubcategories(category);
+                      setCurrentStep("subcategory");
+                    } }
+                  >
+                    {category}
+                  </li>
+                ))}
+              </ul></>
           )}
           {currentStep === "subcategory" && (
-            <ul className="category-list">
-              {subcategories.map((subcategory) => (
-                <li
-                  key={subcategory}
-                  className="category-item"
-                  onClick={() => {
-                    setSelectedSubcategory(subcategory);
-                    fetchProducts(subcategory);
-                    setCurrentStep("product");
-                  }}
-                >
-                  {subcategory}
-                </li>
-              ))}
-            </ul>
+            <><h2 className="pro-section-title">Product Sub-Categories</h2><ul className="pro-category-list">
+                {subcategories.map((subcategory) => (
+                  <li
+                    key={subcategory}
+                    className="pro-category-item"
+                    onClick={() => {
+                      setSelectedSubcategory(subcategory);
+                      fetchProducts(subcategory);
+                      setCurrentStep("product");
+                    } }
+                  >
+                    {subcategory}
+                  </li>
+                ))}
+              </ul></>
           )}
           {currentStep === "product" && (
-            <table className="product-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Product Name</th>
-                  <th>Price</th>
-                  <th>Discount</th>
-                  <th>Quantity</th>
-                  <th>Total</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-              {products.map((product, index) => (
-                <tr key={product._id}>
-                  <td>{index + 1}</td>
-                  <td>{product.proname}</td>
-                  <td>${product.price}</td>
-                  <td>{product.discount}%</td>
-                  <td>
-                    <div className="quantity-control">
-                      <button onClick={() => handleQuantityChange(product._id, -1)}>-</button>
-                      <input 
-                        type="text" 
-                        value={quantities[product._id] || 1} 
-                        readOnly 
-                        className="quantity-box" 
-                      />
-                      <button onClick={() => handleQuantityChange(product._id, 1)}>+</button>
-                    </div>
-                  </td>
-                  <td>
-                    ${calculateTotalPrice(product.price, product.discount, quantities[product._id] || 1)}
-                  </td>
-                  <td>
-                    <button 
-                      className="add-to-cart-btn" 
-                      onClick={() => addToCart(product, quantities[product._id] || 1)}
-                    >
-                      Add to Cart
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            </table>
+            <><h2 className="pro-section-title">Available Products</h2><table className="pro-product-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Discount</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.map((product, index) => (
+                    <tr key={product._id}>
+                      <td>{index + 1}</td>
+                      <td>{product.proname}</td>
+                      <td>Rs.{product.price}</td>
+                      <td>{product.discount}%</td>
+                      <td>
+                        <div className="pro-quantity-control">
+                          <button onClick={() => handleQuantityChange(product._id, -1)}>-</button>
+                          <input
+                            type="text"
+                            value={quantities[product._id] || 1}
+                            readOnly
+                            className="pro-quantity-box" />
+                          <button onClick={() => handleQuantityChange(product._id, 1)}>+</button>
+                        </div>
+                      </td>
+                      <td>
+                        Rs.{calculateTotalPrice(product.price, product.discount, quantities[product._id] || 1)}
+                      </td>
+                      <td>
+                        <button
+                          className="pro-add-to-cart-btn"
+                          onClick={() => addToCart(product, quantities[product._id] || 1)}
+                        >
+                          Add to Cart
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table></>
           )}
         </div>
         
-        <div className="cart-section">
-          <h2 className="section-title">Cart</h2>
-          <ul className="cart-list">
+        <div className="pro-cart-section">
+          <h2 className="pro-section-title">Cart</h2>
+          <ul className="pro-cart-list">
             {cart.map((item, index) => (
               <li key={index}>
                 {item.proname} - ${item.price} - Quantity: {item.quantity} = Total Price {item.totalPrice}
@@ -708,10 +738,9 @@ console.log(cart)
             ))}
           </ul>
         </div>
-  
-      
-  
-        <footer className="footer">© 2024 Your Company Name</footer>
+        </div>
+      </div>
+        <footer className="pro-footer">© 2024 Your Company Name</footer>
       </div>  
   );
 }

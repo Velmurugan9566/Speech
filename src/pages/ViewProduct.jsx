@@ -132,7 +132,7 @@ const handleDeleteSelected = () => {
             <ConfirmDialog group="templating"  visible={visible} onHide={() => setVisible(false)} message="Are you sure you want to proceed?" 
                 header="Confirmation" icon="pi pi-exclamation-triangle" accept={()=>accept()} reject={reject} />
             <div className="card flex justify-content-center">
-                <Button onClick={() => {setVisible(true),setdelcat(category.category)}} icon="pi pi-check" label="Confirm" />
+                <Button onClick={() => {setVisible(true),setdelcat(category.category)}} icon="pi pi-check" label="Delete" />
                       </div>
                  </td>
                 </tr>

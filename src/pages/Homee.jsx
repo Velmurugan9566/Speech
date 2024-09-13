@@ -3,10 +3,9 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import $ from 'jquery';
 import 'slick-carousel';
-
 import { Link, useNavigate } from 'react-router-dom';
 import 'regenerator-runtime/runtime';
-import { FaUser, FaShoppingCart } from 'react-icons/fa';
+import { FaUser, FaShoppingCart,FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
 import Header from './UserHeader.jsx'
 import '../style/homee.css';
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
@@ -84,38 +83,31 @@ function App() {
     }
   };
   useEffect(() => {
-    $(document).ready(function() {
-      $('.hp-carousel').slick({
-        infinite: true,
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        autoplay: true,
-        autoplaySpeed: 3000,
-      });
-    });
+    const sections = document.querySelectorAll('.section');
 
-    // For slide-down content on scroll
-    const revealContent = () => {
-      const contentSections = document.querySelectorAll('.hp-slide-down');
-      contentSections.forEach(section => {
-        const slideInAt = (window.scrollY + window.innerHeight) - section.offsetHeight / 2;
-        const isHalfShown = slideInAt > section.offsetTop;
-        if (isHalfShown) {
-          section.classList.add('hp-active');
+    const handleScroll = () => {
+      sections.forEach(section => {
+        const sectionTop = section.getBoundingClientRect().top;
+        const windowHeight = window.innerHeight;
+
+        // Reveal section when it's in the viewport
+        if (sectionTop < windowHeight - 100) {
+          section.classList.add('active');
         } else {
-          section.classList.remove('hp-active');
+          section.classList.remove('active');
         }
       });
     };
 
-    window.addEventListener('scroll', revealContent);
+    window.addEventListener('scroll', handleScroll);
 
-    return () => window.removeEventListener('scroll', revealContent);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
-
   return (
-    <>
-      <div className="hp-app-container">
+    <div>
+      <div className="App">
         <Header
           isListening={isListening}
           startListening={startListening}
@@ -123,54 +115,60 @@ function App() {
         />
       </div>
 
-      <div className="hp-carousel-container">
-        <div className="hp-carousel">
-          <div><img src="./assets/cartstyle.webps" alt="Item 1" /></div>
-          <div><img src="image2.jpg" alt="Item 2" /></div>
-          <div><img src="image3.jpg" alt="Item 3" /></div>
-        </div>
-      </div>
-
-      <main className="hp-main-content">
-        <p>{transcript}</p>
-        <button className="hp-btn hp-explore-btn" onClick={() => nav("explore")}>Explore</button>
-        <button onClick={startListening} className="hp-btn hp-btn-success">Start</button>
-        <button onClick={stopListening} className="hp-btn hp-btn-success">Stop</button>
-        <button className="hp-btn hp-order-btn" onClick={() => nav("order")}>Order</button>
-      </main>
-
-      {/* Content Section that slides down on scroll */}
-      <section className="hp-content-section hp-slide-down">
+      <section className="section section1">
+        <div className="content">
+        <div className="hp-textbox"> <input type='text' className='textp' placeholder='Tell Explore or Order...' value={transcript}></input><div className='svg'><FaMicrophone /></div> </div>
+         
+        <br/>
+        <button className="hp-btn hp-explore-btn" onClick={() => nav("explore")}>
+          Explore
+        </button>
+        {/* <button onClick={startListening} className="hp-btn hp-btn-success">
+          Start
+        </button>
+        <button onClick={stopListening} className="hp-btn hp-btn-success">
+          Stop
+        </button> */}
+        <button className="hp-btn hp-order-btn" onClick={() => nav("order")}>
+          Order
+        </button>
         <h2>About the Project</h2>
-        <p>
-          The Voice-Based Bill Generation System in Supermarket helps visually impaired users shop independently using voice commands.
-        </p>
+        <p><b>
+          The Voice-Based Shopping in Supermarket helps visually impaired users shop independently using voice commands.
+          </b></p>
+        </div>
       </section>
-
-      <section className="hp-content-section hp-slide-down">
+      <section className="section section3">
+      <div className="content">
         <h2>How to Purchase</h2>
         <p>
-          1. Start by registering or logging in using voice commands.<br />
-          2. Browse items by speaking the product name.<br />
-          3. Add items to your cart using voice instructions.<br />
-          4. Once done, proceed to checkout and let the system generate a bill.
+          1. Start by 'Explore' Command.<br />
+          2. The system will speak the list of Category tell the Category name to view Subcategory<br />
+          3. The System will speak the list of Subcategory then tell the SubCategory.To view the Product Name<br />
+          4. Tell the product name if its found then tell the quantity then the product will add to cart. <br/>
+          5. Use 'Back' command to back one step to the previous state.<br/>
+          6. Use 'cart' command to navigate to the Cart page<br/>
         </p>
+        </div>
       </section>
-
-      <section className="hp-content-section hp-slide-down">
-        <h2>Voice Commands</h2>
+      <section className="section section2">
+       
+      </section>
+      <section className="section section3">
+        <div className="content">
+        <h2>list of Voice Commands in Cart page</h2>
         <p>
           Example voice commands:<br />
           - "Add milk to cart"<br />
           - "Checkout now"<br />
           - "Show my cart"
         </p>
+        </div>
       </section>
-
-      <footer className="hp-footer">
-        Address
+        <footer className="footer">
+        <h2>Footer</h2>
       </footer>
-    </>
+    </div>
   );
 };
 

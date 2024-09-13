@@ -81,7 +81,7 @@ function Admin() {
               <strong>User Id</strong>
               <input
                 type="text"
-                placeholder="Enter Email Address"
+                placeholder="Enter the admin Id"
                 autoComplete="off"
                 name="email"
                 className="form-control rounded-2"
@@ -109,8 +109,6 @@ function Admin() {
               </button>
             )}
             <Link to="/forgetps"><p className="text-center mt-2">Forget Password</p></Link>
-            <p className="text-center">Don't have an account?</p>
-            <Link to="/" className="btn btn-default border w-100 bg-light">SignUp</Link>
           </form>
         </div>
       </div>

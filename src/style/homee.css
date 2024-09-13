@@ -8,7 +8,14 @@
     justify-content: center;
     display: flex;
 } */
-.hp-slide-down {
+ .background {
+  background-image: url('../assets/l-intro-1701118417.jpg');
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+}
+
+/* .hp-slide-down {
     opacity: 0;
     transition: opacity 0.6s ease-out;
   }
@@ -56,4 +63,133 @@
     opacity: 1;
     transform: translateY(0);
   }
-  
+   */
+   /* App.css */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  scroll-behavior: smooth;
+}
+
+.App {
+  width: 100%;
+}
+
+.section {
+  height: 100vh; /* Full viewport height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  opacity: 0; /* Hidden initially */
+  transform: translateY(20px); /* Move up slightly for a smoother effect */
+  transition: opacity 1s ease-out, transform 1s ease-out;
+}
+
+.section.active {
+  opacity: 1;
+  transform: translateY(0); /* When active, slide back to its original position */
+}
+
+.section1 {
+  background-image: url('../assets/RS31077_ThinkstockPhotos-813686180-scr.jpg');
+}
+
+.section2 {
+  background-image: url('../assets/l-intro-1701118417.jpg');
+}
+
+.section3 {
+  background-image: url('../assets/marketing-to-attract-grocery-stores_resize_b45a1fb8f9f0ff146ef27e828cb662f6.jpg');
+}
+
+.content {
+  text-align: center;
+  background: rgba(0, 0, 0, 0.6); /* Dark overlay for text readability */
+  padding: 20px;
+  color: white;
+  border-radius: 8px;
+}
+
+.footer {
+  height: 300px;
+  background-color: #333;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hp-textbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
+  color: black;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-bottom: 40px; /* Adds larger spacing between textbox and other elements */
+  width: 100%; /* Makes the textbox full-width */
+  max-width: 600px; /* Restricts the width */
+}
+
+.textp {
+  flex-grow: 1;
+  margin-right: 10px;
+  font-size: 18px;
+  color: black;
+  border: none;
+}
+
+.hp-textbox .svg {
+  font-size: 24px;
+  color: #555; /* Color for the microphone icon */
+  margin-left: auto; /* Aligns the microphone icon to the far right */
+}
+
+.hp-btn {
+  margin: 10px;
+}
+
+h2, p {
+  margin-top: 20px;
+}
+/* Button Styling */
+.hp-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.hp-btn-success {
+  background-color: #4caf50;
+  color: white;
+}
+
+.hp-btn:hover {
+  background-color: #388e3c;
+}
+
+.hp-explore-btn {
+  background-color: #2196f3;
+  color: white;
+}
+
+.hp-explore-btn:hover {
+  background-color: #1976d2;
+}
+
+.hp-order-btn {
+  background-color: #ff9800;
+  color: white;
+}
+
+.hp-order-btn:hover {
+  background-color: #f57c00;
+}

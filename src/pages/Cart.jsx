@@ -162,7 +162,7 @@ import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 import "../style/CartStyle.css"
 import Header from './UserHeader'
-
+import { FaUser, FaShoppingCart,FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
 const Cart = () => {
   //const [cart, setCart] = useState([]);
   const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem('cart')) || []);
@@ -539,65 +539,68 @@ const calculateTotalPrice = (price, discount, quantity) => {
 
 
   return (
-    <div className="main-container">
-      <Header
-        isListening={isListening}
-        startListening={startListening}
-        stopListening={stopListening}
-      />
-      <div className="container">
-        <div className="listening-section">
-          <input type="text" value={transcript} readOnly className="transcript-box" />
-          <input type="text" placeholder="Search for products..." className="search-box" />
-        </div>
-        <div className="product-list-section">
-          <h2>Products</h2>
-          <ul className="product-list">
-            {products.map((product,index) => (
-              <li key={index}>{product.proname}</li>
-            ))}
-          </ul>
-        </div><div>
-  <h2>Shopping Cart</h2>
-  <table cellPadding={10}>
-    <thead>
-      <tr>
-        <td>S.No.</td>
-        <td>Product Name</td>
-        <td>Quantity</td>
-        <td>Discount</td>
-        <td>Per Price</td>
-        <td>Total Price</td>
-      </tr>
-    </thead>
-    <tbody>
-      {cart.map((item, index) => (
-        <tr key={index}>
-          <td>{index + 1}</td>
-          <td>{item.proname}</td>
-          <td>
-            <button onClick={() => handleQuantityChange(item._id, -1)}>-</button>
-            {quantities[item._id] || item.quantity}
-            <button onClick={() => handleQuantityChange(item._id, 1)}>+</button>
-          </td>
-          <td>{item.discount}%</td>
-          <td>{item.price}</td>
-          <td>
-            {calculateTotalPrice(item.price, item.discount, quantities[item._id] || item.quantity)}
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-  <div className="total-amount">
-    <h3>Total Amount: Rs. {cart.reduce((acc, item) => acc + parseFloat(item.totalPrice), 0)}</h3>
-    <button onClick={generatePDF} area-label="generate PDF">
-      Print Bill
-    </button>
-  </div>
-</div>
+    <>
+  <Header
+    isListening={isListening}
+    startListening={startListening}
+    stopListening={stopListening}
+  /><div className="main-container pro-main-container">
+  <div className="container">
+  <div className="hp-textbox"> <input type='text' className='textp' placeholder='Tell Explore or Order...' value={transcript}></input><div className='svg'><FaMicrophone /></div> </div>
+    {/* <div className="product-list-section pro-product-list-section">
+      <h2>Products</h2>
+      <ul className="product-list pro-product-list">
+        {products.map((product, index) => (
+          <li key={index}>{product.proname}</li>
+        ))}
+      </ul>
+    </div> */}
+
+    <div>
+      <h2>Shopping Cart</h2>
+      <table cellPadding={10} className="pro-cart-table">
+        <thead>
+          <tr>
+            <td>S.No.</td>
+            <td>Product Name</td>
+            <td>Quantity</td>
+            <td>Discount</td>
+            <td>Per Price</td>
+            <td>Total Price</td>
+            <td>Actions</td>
+          </tr>
+        </thead>
+        <tbody>
+          {cart.map((item, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
+              <td>{item.proname}</td>
+              <td className="pro-quantity-control">
+                <button onClick={() => handleQuantityChange(item._id, -1)}>-</button>
+                {quantities[item._id] || item.quantity}
+                <button onClick={() => handleQuantityChange(item._id, 1)}>+</button>
+              </td>
+              <td>{item.discount}%</td>
+              <td>{item.price}</td>
+              <td>{calculateTotalPrice(item.price, item.discount, quantities[item._id] || item.quantity)}</td>
+              <td>
+                <button className="pro-remove-btn" onClick={() => removeItemFromCart(item._id)}>Remove</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="total-amount pro-total-amount">
+        <h3>Total Amount: Rs. {cart.reduce((acc, item) => acc + parseFloat(item.totalPrice), 0).toFixed(2)}</h3>
+        <button className="pro-print-btn" onClick={generatePDF} aria-label="generate PDF">
+          Print Bill
+        </button>
       </div>
     </div>
-  );
+  </div>
+</div>
+</>
+  )  
 };
 export default Cart;

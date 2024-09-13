@@ -4,7 +4,16 @@ body {
     padding: 0;
     box-sizing: border-box;
 }
-
+main{
+    min-height: 100vh;
+    padding: 20px;
+    background: url('../assets/cartstyle.webp') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    color: #003d1c;
+}
 /* Header styling */
 header {
     width: 100%;
@@ -14,7 +23,25 @@ header {
     text-align: center;
     position: relative;
 }
-
+button{
+   padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #ff9800;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+.add-pro-btn{
+  padding: 10px 20px;
+  width: 50vh;
+  background: linear-gradient(90deg, #faef2a, #ff9000);
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
 header h2 {
     margin: 0;
     font-size: 24px;
