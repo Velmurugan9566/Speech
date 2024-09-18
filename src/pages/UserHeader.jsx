@@ -25,8 +25,8 @@ const Header = ({ isListening, startListening, stopListening }) => {
     <header className="h-header">
       <div className="h-top-row">
         <div className="h-profile">
-          <FaUser className="h-icon" />
-          <span>Profile</span>
+          <FaUser className="h-icon"/>
+         <Link to="/Profile" className='profilelink' onClick={() => handleForward('/Profile')}> Profile</Link>
           <div className="h-submenu">
             <Link to="/Admin" onClick={() => handleForward('/Admin')}>Admin</Link>
           </div>

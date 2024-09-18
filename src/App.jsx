@@ -13,7 +13,9 @@ import ViewProducts from "./pages/ViewProduct.jsx"
 import UpdateProduct from "./pages/UpdateProduct.jsx"
 import 'regenerator-runtime/runtime';
 import Registration from "./pages/Regustratuin.jsx"
-
+import RegisterLogin from "./pages/UserRegistration.jsx";
+import Profile from "./pages/UserProfile.jsx";
+import Login from "./pages/UserLogin.jsx"
 function App() {
   return (
     <>
@@ -28,6 +30,9 @@ function App() {
          <Route path='/DashBoard/Addproduct' element={<Addproduct/>}></Route>
          <Route path='/DashBoard/ViewProduct' element={<ViewProducts/>}></Route>
          <Route path='/DashBoard/UpdateProudct/:id' element={<UpdateProduct/>}></Route>
+         <Route path='/UserRegistration' element={<RegisterLogin/>} ></Route>
+         <Route path='/Profile' element={<Profile/>}></Route>
+         <Route path='/Login' element={<Login/>}></Route>
       </Routes>
       </BrowserRouter>
 

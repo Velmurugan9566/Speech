@@ -1,0 +1,78 @@
+.re-main{
+    padding:40px;
+    background-image: url('../assets/depositphotos_409313702-stock-photo-shopping-basket-filled-fruits-vegetables.jpg');
+    background-size: cover;
+    background-position: center;
+}
+.re-form-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100vh;
+    padding-left: 50px;
+    /* background-color: #f5f5f5; */
+    /* Replace the color below with your desired background image */
+  
+}
+.error {
+    border: 1px solid red;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 12px;
+  }
+  
+
+.re-form-box {
+    width: 40%;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.85);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.re-form-box h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.re-form-box label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.re-form-box input, select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.re-form-box button {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.re-form-box button:hover {
+    background-color: #218838;
+}
+
+#error-message {
+    color: red;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .re-form-box {
+        width: 80%;
+        padding: 15px;
+    }
+}

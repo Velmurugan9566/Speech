@@ -21,6 +21,12 @@
   cursor: pointer;
   position: absolute;
   right: 15px;
+  text-decoration: none;
+}
+.profilelink{
+  text-decoration: none;
+  color: rgb(255, 255, 255);
+  cursor:alias;
 }
 
 .h-profile:hover .h-submenu {
@@ -37,7 +43,7 @@
   left: 0;
   background-color: #444;
   padding: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(108, 142, 255, 0.2);
   border-radius: 5px;
   z-index: 10;
 }

@@ -117,7 +117,7 @@ function App() {
 
       <section className="section section1">
         <div className="content">
-        <div className="hp-textbox"> <input type='text' className='textp' placeholder='Tell Explore or Order...' value={transcript}></input><div className='svg'><FaMicrophone /></div> </div>
+        <div className="hp-textbox"> <input type='text' className='textp' placeholder='Tell Explore or Order...' value={transcript} readOnly></input><div className='svg'><FaMicrophone /></div> </div>
          
         <br/>
         <button className="hp-btn hp-explore-btn" onClick={() => nav("explore")}>

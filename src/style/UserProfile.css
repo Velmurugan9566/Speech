@@ -1,0 +1,75 @@
+.pr-section {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  
+  .pr-section1 {
+    background-image: url('../assets/cartonleft.jpg');
+  }
+  
+  .pr-content {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 30px;
+    border-radius: 8px;
+    color: white;
+  }
+  
+  .pr-transcript-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .pr-textbox {
+    width: 80%;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 18px;
+    margin-right: 10px;
+  }
+  
+  .pr-microphone {
+    font-size: 24px;
+    color: #fff;
+  }
+  
+  .pr-icon {
+    font-size: 60px;
+    margin-top: 20px;
+  }
+  
+  .pr-user-details table {
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  .pr-user-details th, .pr-user-details td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid white;
+  }
+  
+  .pr-popup-content {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 8px;
+    color: black;
+  }
+  
+  .pr-footer {
+    height: 100px;
+    background-color: #333;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
