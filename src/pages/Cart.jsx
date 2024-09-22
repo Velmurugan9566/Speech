@@ -163,9 +163,10 @@ import 'jspdf-autotable';
 import "../style/CartStyle.css"
 import Header from './UserHeader'
 import { FaUser, FaShoppingCart,FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
+import { ToastContainer, toast } from 'react-toastify';
 const Cart = () => {
   //const [cart, setCart] = useState([]);
-  const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem('cart')) || []);
+  const [cart, setCart] = useState(() => JSON.parse(sessionStorage.getItem('cart')) || []);
   const [listeningForProduct, setListeningForProduct] = useState(true);
   const [currentProduct, setCurrentProduct] = useState("");
   const [waitingForQuantity, setWaitingForQuantity] = useState(false);
@@ -173,6 +174,9 @@ const Cart = () => {
   const [products, setProducts] = useState([]);
   const [command, setCommand] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const user = sessionStorage.getItem('userid') || ''; 
+  const [shouldUpdateCart,setShouldUpdateCart] = useState(false);
+
   const startListening = () => {
     resetTranscript();
     setIsListening(true)
@@ -202,8 +206,21 @@ const Cart = () => {
         console.error("Error fetching products:", error);
       }
     };
-
     fetchProducts();
+    const fetchCart = async () => {
+      if(user){
+      try { 
+        console.log("fetch");
+        const response = await axios.get(`http://localhost:3001/fetchCart/${user}`);
+        console.log(response.data);
+        setCart(response.data);
+      } catch (error) {
+        console.error("Error fetching Cart Products:", error);
+        speak("Error fetching cart Products. Please try again later.");
+      }
+      }
+    };
+    fetchCart();
   }, []);
 
   useEffect(() => {
@@ -463,6 +480,28 @@ const generatePDF = () => {
   doc.save("shopping-cart-bill.pdf");
 };
 
+useEffect(()=>{
+  if(shouldUpdateCart){
+    UpdateCartItem();
+    setShouldUpdateCart(false);
+  }
+},[shouldUpdateCart])
+function UpdateCartItem(){
+  //console.log("cart",cart);
+  //console.log("jsonStrigify",JSON.stringify(cart))
+  if(user){
+    const email =user;
+    const status =2;
+    console.log("before send",cart)
+    axios.put('http://localhost:3001/updateCart',{cart,email,status})
+    .then(msg =>console.log(msg))
+    .catch(err=>console.log(err))
+  }else{
+   sessionStorage.setItem('cart', JSON.stringify(cart));
+   console.log("session Cart",JSON.parse(sessionStorage.getItem('cart')))
+  }    
+};
+
     
   const addToCart = (productName, quantity) => {
     const response = axios.get(`http://localhost:3001/product/${productName}`);
@@ -536,7 +575,14 @@ const calculateTotalPrice = (price, discount, quantity) => {
   const discountedPrice = price * (1 - discount / 100);
   return (discountedPrice * quantity).toFixed(2);
 };
+const removeItemFromCart=(id)=>{
+    console.log("before",cart);
+    var temp = JSON.parse(sessionStorage.getItem('cart'))
+    sessionStorage.setItem('cart', JSON.stringify(temp.filter(item => item._id !== id)));
+    setCart(JSON.parse(sessionStorage.getItem('cart')));
+    console.log("after",cart);
 
+}
 
   return (
     <>
@@ -546,7 +592,7 @@ const calculateTotalPrice = (price, discount, quantity) => {
     stopListening={stopListening}
   /><div className="main-container pro-main-container">
   <div className="container">
-  <div className="hp-textbox"> <input type='text' className='textp' placeholder='Tell Explore or Order...' value={transcript}></input><div className='svg'><FaMicrophone /></div> </div>
+  <div className="hp-textbox"> <input type='text' className='textp' placeholder='Tell Explore or Order...' value={transcript} readOnly></input><div className='svg'><FaMicrophone /></div> </div>
     {/* <div className="product-list-section pro-product-list-section">
       <h2>Products</h2>
       <ul className="product-list pro-product-list">

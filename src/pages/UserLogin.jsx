@@ -16,8 +16,9 @@ function LoginPage() {
   const [isListening, setIsListening] = useState(false);
   const [error, setError] = useState('');
   
+  const [cart, setCart] = useState(() => JSON.parse(sessionStorage.getItem('cart')) || []);
   const { transcript, resetTranscript } = useSpeechRecognition();
-
+   console.log("login page",cart);
   const startListening = () => {
     resetTranscript();
     SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
@@ -57,33 +58,34 @@ function LoginPage() {
   const handleSubmit = async (e) => {
     e && e.preventDefault();
     setError(''); // Reset error
-  try {
-    axios.post('http://localhost:3001/login', { 
-      email, 
-      password 
-    })
-    .then(res=>{
-      const data = res.data;
-      if (data.status==1) {
-        sessionStorage.setItem('userid',email); // Store session variable
-        toast.success("Login successful! Redirecting...");
-        navigate(-1); // Navigate back to the previous page
-      } else if (data.status == 2) {
-        toast.error("Email ID does not exist.");
-       // startListening(); // Ask for input again
-      } else if (data.status==3) {
-        toast.error("Incorrect password. Please try again.");
-       // startListening(); // Ask for input again
-      }  
-    })
-.catch(err=>{
-  toast.warning(err);
-})
-      } catch (err) {
-    toast.error("Error logging in. Please try again.");
-    console.error(err);
-  }
-  };
+    try {
+        const res = await axios.post('http://localhost:3001/login', { email, password });
+        const data = res.data;
+
+        if (data.status == 1) {
+            sessionStorage.setItem('userid', email); // Store session variable
+            toast.success("Login successful! Redirecting...");
+
+            if (cart && cart.length > 0) {
+                const status = 1;
+                const result = await axios.put('http://localhost:3001/updateCart', { cart, email, status });
+                console.log("Cart updated:", result.data);
+                sessionStorage.setItem('cart', JSON.stringify([])); // Clear cart in session storage
+            }
+           
+            console.log("updated..");
+            navigate(-1); // Navigate back to the previous page
+        } else if (data.status == 2) {
+            toast.error("Email ID does not exist.");
+        } else if (data.status == 3) {
+            toast.error("Incorrect password. Please try again.");
+        }  
+    } catch (err) {
+        toast.error("Error logging in. Please try again.");
+        console.error(err);
+    }
+};
+
 
   return (
     <>
