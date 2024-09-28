@@ -16,6 +16,7 @@ import Registration from "./pages/Regustratuin.jsx"
 import RegisterLogin from "./pages/UserRegistration.jsx";
 import Profile from "./pages/UserProfile.jsx";
 import Login from "./pages/UserLogin.jsx"
+import Checkout from "./pages/Checkout.jsx"
 function App() {
   return (
     <>
@@ -33,6 +34,7 @@ function App() {
          <Route path='/UserRegistration' element={<RegisterLogin/>} ></Route>
          <Route path='/Profile' element={<Profile/>}></Route>
          <Route path='/Login' element={<Login/>}></Route>
+         <Route path='/Checkout' element={<Checkout/>}></Route>
       </Routes>
       </BrowserRouter>
 

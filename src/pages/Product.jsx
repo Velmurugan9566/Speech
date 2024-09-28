@@ -109,7 +109,7 @@ function App() {
 const addToCart = (product, quantity) => {
   const discountedPrice = product.price * (1 - product.discount / 100);
   const additionalPrice = discountedPrice * quantity;
-  const existingProductIndex = cart.findIndex(item => item._id === product._id);
+  const existingProductIndex = cart.findIndex(item => item.proname === product.proname);
   
   if (existingProductIndex >= 0) {
     const updatedCart = [...cart];
@@ -140,8 +140,8 @@ const addToCart = (product, quantity) => {
     console.log("Cart",cart);
     setShouldUpdateCart(true);
     //UpdateCartItem();
-    toast(`${quantity} of ${product.proname} has been added to your cart with a total price of $${cartItem.totalPrice}.`)
-    speak(`${quantity} of ${product.proname} has been added to your cart with a total price of $${cartItem.totalPrice}.`);
+    toast(`${quantity} of ${product.proname} has been added to your cart with a total price of Rs.${cartItem.totalPrice}.`)
+    speak(`${quantity} of ${product.proname} has been added to your cart with a total price of Rupees.${cartItem.totalPrice}.`);
   }
 };
 

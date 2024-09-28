@@ -9,14 +9,6 @@
   position: relative;
   color: #003d1c;
 }
-
-/* Listening Section */
-.pro-listening-section {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
 .pro-transcript-box {
   width: 60%;
   padding: 10px;
@@ -32,29 +24,6 @@
   border-radius: 4px;
   border: 1px solid #ccc;
 }
-
-/* Product List Section */
-.pro-product-list-section {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 20px;
-}
-
-.pro-product-list {
-  list-style-type: none;
-  padding: 0;
-}
-
-.pro-product-list li {
-  padding: 10px;
-  border-bottom: 1px solid #ccc;
-  transition: background-color 0.3s ease;
-}
-
-.pro-product-list li:hover {
-  background-color: #e0f7fa;
-}
-
 /* Cart Table */
 .pro-cart-section h2 {
   margin-bottom: 15px;
@@ -170,6 +139,6 @@
   }
 
   .pro-print-btn {
-    width: 100%;
+    width: 50%;
   }
 }

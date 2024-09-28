@@ -1,0 +1,66 @@
+/* Popup Styling */
+.ch-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    z-index: 100;
+    animation: popupFadeIn 1s forwards;
+  }
+  
+  .ch-popup-title {
+    color: #2ecc71; /* Success green color */
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+  
+  @keyframes popupFadeIn {
+    from {
+      transform: translate(-50%, -60%);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, -50%);
+      opacity: 1;
+    }
+  }
+  
+  /* Confetti Styling */
+  .ch-confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 99;
+  }
+  
+  .ch-confetti {
+    position: absolute;
+    background-color: hsl(calc(360 * var(--hue)), 100%, 50%);
+    border-radius: 50%;
+    animation: fall linear forwards;
+    opacity: 0.8;
+  }
+  
+  @keyframes fall {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(100vh) rotate(720deg);
+    }
+  }
+  
+  /* Colorful Confetti Animation */
+  .ch-confetti {
+    --hue: calc(100 * var(--i) / 10);
+    background-color: hsl(calc(360 * var(--hue)), 100%, 50%);
+  }
+  

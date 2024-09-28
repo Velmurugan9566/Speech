@@ -164,6 +164,9 @@ import "../style/CartStyle.css"
 import Header from './UserHeader'
 import { FaUser, FaShoppingCart,FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
+import { Link, useNavigate } from 'react-router-dom';
+import generatePDF from './Printpage';
+
 const Cart = () => {
   //const [cart, setCart] = useState([]);
   const [cart, setCart] = useState(() => JSON.parse(sessionStorage.getItem('cart')) || []);
@@ -176,12 +179,15 @@ const Cart = () => {
   const [isListening, setIsListening] = useState(false);
   const user = sessionStorage.getItem('userid') || ''; 
   const [shouldUpdateCart,setShouldUpdateCart] = useState(false);
+  const navigate = useNavigate();
+  const [addQuan,setAddQuan] = useState(0)
 
   const startListening = () => {
     resetTranscript();
     setIsListening(true)
     SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
-    speak("Please say the product name.");
+    setListeningForProduct(true);
+    speak('Welcome to your cart. Please say the product name to start.');
   };
 
   const stopListening = () => {
@@ -196,7 +202,19 @@ const Cart = () => {
     resetTranscript,
     browserSupportsSpeechRecognition
   } = useSpeechRecognition();
-
+  const fetchCart = async () => {
+    if(user){
+    try { 
+      console.log("fetch");
+      const response = await axios.get(`http://localhost:3001/fetchCart/${user}`);
+      console.log(response.data);
+      setCart(response.data);
+    } catch (error) {
+      console.error("Error fetching Cart Products:", error);
+      speak("Error fetching cart Products. Please try again later.");
+    }
+    }
+  };
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -207,37 +225,73 @@ const Cart = () => {
       }
     };
     fetchProducts();
-    const fetchCart = async () => {
-      if(user){
-      try { 
-        console.log("fetch");
-        const response = await axios.get(`http://localhost:3001/fetchCart/${user}`);
-        console.log(response.data);
-        setCart(response.data);
-      } catch (error) {
-        console.error("Error fetching Cart Products:", error);
-        speak("Error fetching cart Products. Please try again later.");
-      }
-      }
-    };
+ 
     fetchCart();
   }, []);
-
   useEffect(() => {
     if (!transcript) return;
-
     const lowerTranscript = transcript.trim().toLowerCase();
-
-    if (lowerTranscript === "stop") {
-      stopListening();
-      return;
-    }
-    if (lowerTranscript === "reset") {
+  
+    // Handling core commands
+    const handleCoreCommands = (transcript) => {
+      if (/stop/.test(lowerTranscript)) {
+        stopListening();
+        return true;
+      }
+      if (/reset/.test(lowerTranscript)) {
+        resetTranscript();
+        setCart([]);
+        speak('Cart is now empty.');
+        return true;
+      }
+      if (/explore/.test(lowerTranscript)) {
+        resetTranscript();
+        speak("Navigating to Exploring Page");
+        navigate("/product");
+        return true;
+      }
+      if (/print bill/.test(lowerTranscript)) {
+        resetTranscript();
+        if(cart.length >0){
+          generatePDF(cart);
+          speak('Your bill is ready to download..')
+        }else{
+          speak('Cart is now empty. you CANNOT Print Bill..');
+        }
+        return true;
+      }
+      if (/checkout/.test(lowerTranscript)) {
+        resetTranscript();
+        checkOut()
+        return true;
+      }
+      if (/preview cart/.test(lowerTranscript)) {
+        resetTranscript();
+        previewCart()
+      }
+      return false;
+    };
+  
+    // Check for core commands first
+    if (handleCoreCommands(transcript)) return;
+  
+    // Back command to go back to the previous step
+    if (/back/.test(lowerTranscript)) {
+      if (waitingForQuantity) {
+        speak('Going back to product selection.');
+        setWaitingForQuantity(false);
+        setListeningForProduct(true);
+      } else if (waitingForProductName) {
+        speak('Going back to main command.');
+        setWaitingForProductName(false);
+        setListeningForProduct(true);
+      } else {
+        speak('Already in main command.');
+      }
       resetTranscript();
-      setCart([]);
-      speak('cart is empty..');
       return;
     }
+  
     if (lowerTranscript === "remove") {
       setCommand("remove");
       speak("Please say the product name to remove.");
@@ -245,58 +299,120 @@ const Cart = () => {
       resetTranscript();
       return;
     }
+  
     if (lowerTranscript === "add quantity") {
       setCommand("addQuantity");
       speak("Please say the product name to add quantity.");
+      setAddQuan(1);
       setWaitingForProductName(true);
       resetTranscript();
       return;
     }
+  
+    // Handle product name input with fuzzy matching
+    const handleProductInput = (productName) => {
+      //console.log("from fun",productName)
 
-    if (waitingForQuantity) {
-      const timer = setTimeout(() => {
-        if (command === "addQuantity") {
-          updateCartQuantity(currentProduct, transcript);
-        } else {
-          addToCart(currentProduct, transcript);
-        }
-        setCurrentProduct("");
-        setListeningForProduct(true);
-        setWaitingForQuantity(false);
+      const matchingProducts = findSimilarProducts(productName,addQuan);
+      if (matchingProducts.length === 0) {
+        speak("Product not available. Please say the product name again.");
+      } else if (matchingProducts.length === 1) {
+        const foundProduct = matchingProducts[0];
+        setCurrentProduct(foundProduct)
+        speak(`You have selected ${foundProduct.proname}. How many would you like to add?`);
+        setWaitingForQuantity(true);
+        setListeningForProduct(false);
+      } else {
+        speakOptions(matchingProducts.map(product => product.proname));
+        //speak(`We found multiple matches for ${productName}: ${matchingProducts.join(", ")}. Please repeat the product name.`);
+      }
+      resetTranscript();
+    };
+  
+    // Handle quantity input, validate, and add to cart
+    const handleQuantityInput = (quantity) => {
+      const parsedQuantity = parseInt(quantity);
+  
+      if (isNaN(parsedQuantity) || parsedQuantity < 0) {
+        speak('Invalid quantity. Please say the quantity again.');
         resetTranscript();
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    } else if (waitingForProductName) {
+        return;
+      }
+      const flag = addToCart(currentProduct, parsedQuantity);
+      if(flag != 1){
+        speak(`${parsedQuantity} items of ${currentProduct.proname} added to your cart.`);
+        setCurrentProduct('');
+        setWaitingForQuantity(false);
+        setListeningForProduct(true);
+        resetTranscript();
+      }else{
+        speak(' Please say the quantity again., or say "back" for Product Selection..');
+        resetTranscript();
+        return;
+      }
+      
+    };
+  
+    // Waiting for the product name to add or remove items
+    if (waitingForProductName) {
       const timer = setTimeout(() => {
         if (command === "remove") {
-          handleRemoveProduct(transcript);
+          const matchingProducts = findSimilarProducts(transcript);
+          if (matchingProducts.length === 0) {
+            speak("Product not found. Please try again.");
+          } else if (matchingProducts.length === 1) {
+            handleRemoveProduct(matchingProducts[0]);
+            speak(`${matchingProducts[0]} removed from your cart.`);
+          } else {
+            speak(`We found multiple matches: ${matchingProducts.join(", ")}. Please select one.`);
+          }
         } else {
           handleProductInput(transcript);
         }
         resetTranscript();
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    } else {
-      const timer = setTimeout(() => {
-        handleProductInput(transcript);
-        resetTranscript();
-      }, 5000);
-
+      }, 3000);
+  
       return () => clearTimeout(timer);
     }
+  
+    // Waiting for the quantity to add to cart
+    if (waitingForQuantity) {
+      const timer = setTimeout(() => {
+        handleQuantityInput(transcript);
+      }, 3000);
+  
+      return () => clearTimeout(timer);
+    }
+  
+    // General product input if no special commands are issued
+    const timer = setTimeout(() => {
+      handleProductInput(transcript);
+    }, 3000);
+  
+    return () => clearTimeout(timer);
+  
   }, [transcript]);
+  
+  // Helper function to find similar products
+  const findSimilarProducts = (productName,q=0) => {
+    const lowerProductName = productName.trim().toLowerCase();
+    //console.log(lowerProductName)
+    if(q==1){
+      return cart.filter(p => p.proname.toLowerCase().includes(lowerProductName))
+    }
+    return products.filter(p => p.proname.toLowerCase().includes(lowerProductName))
+     
+  };
+  const speakOptions = (options) => {
+    const optionsList = options.join(", ");
+    speak(`There are multiple products available: ${optionsList}. Please select one.`);
+  };
+  
 
   if (!browserSupportsSpeechRecognition) {
     return <span>Browser doesn't support speech recognition.</span>;
   }
-  useEffect(() => {
-    // Stop speaking when the component unmounts (e.g., navigating to a new page)
-    return () => {
-      //speechSynthesis.cancel();
-    };
-  }, []);
+ 
 
   const reset = () => {
     resetTranscript();
@@ -310,48 +426,6 @@ const Cart = () => {
     //speechSynthesis.cancel();
   };
 
-  const handleProductInput = async (input) => {
-    const productName = input.trim().toLowerCase();
-    const matchedProducts = products.filter(p => p.proname.includes(productName));
-
-    if (matchedProducts.length === 1) {
-      setCurrentProduct(matchedProducts[0]._id);
-      setListeningForProduct(false);
-      setWaitingForQuantity(true);
-      speak(`You said ${matchedProducts[0].proname}. Please specify the quantity.`);
-      resetTranscript();
-    } else if (matchedProducts.length > 1) {
-      speak(`Multiple products found: ${matchedProducts.map(p => p.proname).join(", ")}. Please say the full product name.`);
-      resetTranscript();
-    } else {
-      speak("Product not available. Please say the product name again.");
-      resetTranscript();
-    }
-  };
-
-  // const addToCart = async (productName, quantity) => {
-  //   try {
-  //     const response = await axios.get(`http://localhost:3001/product/${productName}`);
-  //     const product = response.data;
-  //     const parsedQuantity = parseInt(quantity);
-
-  //     if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
-  //       speak("Invalid quantity. Please try again.");
-  //       return;
-  //     }
-
-  //     if (parsedQuantity > product.quantity) {
-  //       speak(`Only ${product.quantity} of ${product.proname} available. Please try again.`);
-  //       return;
-  //     }
-
-  //     setCart((prevCart) => [...prevCart, { name: product.proname, quantity: parsedQuantity, price: product.price * parsedQuantity }]);
-  //     speak(`Added ${parsedQuantity} of ${product.proname} to cart. Please say the next product name.`);
-  //   } catch (error) {
-  //     speak("Error adding product to cart. Please try again.");
-  //     console.error("Error adding product to cart:", error);
-  //   }
-  // };
 // Voice command handling for removing product
 const handleRemoveProduct = async (input) => {
   const productName = input.trim().toLowerCase();
@@ -361,9 +435,10 @@ const handleRemoveProduct = async (input) => {
 
   if (matchedProducts.length === 1) {
     // Remove the matched product from the cart
-    const updatedCart = cart.filter(item => item.proname && item.proname.toLowerCase() !== matchedProducts[0].proname.toLowerCase());
-    setCart(updatedCart);
-    speak(`Removed ${matchedProducts[0].proname} from the cart.`);
+    // const updatedCart = cart.filter(item => item.proname && item.proname.toLowerCase() !== matchedProducts[0].proname.toLowerCase());
+    // setCart(updatedCart);
+    removeItemFromCart(matchedProducts[0].proname);
+    //speak(`Removed ${matchedProducts[0].proname} from the cart.`);
     resetTranscript();
     setWaitingForProductName(false); // Go back to product listening
   } else if (matchedProducts.length > 1) {
@@ -416,70 +491,6 @@ const handleRemoveProduct = async (input) => {
     }
   };
 
- // Import autoTable plugin
-
-const generatePDF = () => {
-  const doc = new jsPDF();
-
-  // Title
-  doc.setFontSize(18);
-  doc.text("Shopping Cart Bill", doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
-
-  // Date and Time
-  const currentDate = new Date().toLocaleString();
-  doc.setFontSize(12);
-  doc.text(`Date: ${currentDate}`, 10, 30); // Left aligned
-
-  // Table headers
-  const headers = [["S.No.", "Product Name", "Quantity", "Price", "Total"]];
-
-  // Table body (product details)
-  const data = cart.map((item, index) => [
-    index + 1,
-    item.proname,
-    item.quantity,
-    parseFloat(item.price).toFixed(2), // Ensure price is a number
-    parseFloat(item.totalPrice || 0).toFixed(2) // Ensure totalPrice is a number and fallback to 0 if undefined
-  ]);
-
-  // Draw the table
-  doc.autoTable({
-    head: headers,
-    body: data,
-    startY: 40, // Start after the Date
-    theme: 'grid', // Adds borders around the cells
-    styles: {
-      halign: 'center', // Center align text
-      cellPadding: 3,
-    },
-    headStyles: { fillColor: [71, 103, 154] }, // Header background color
-    bodyStyles: { valign: 'middle' }, // Vertically align text to the middle
-    columnStyles: {
-      0: { cellWidth: 15 },  // S.No.
-      1: { cellWidth: 80 },  // Product Name
-      2: { cellWidth: 30 },  // Quantity
-      3: { cellWidth: 30 },  // Price
-      4: { cellWidth: 30 },  // Total Price
-    },
-  });
-
-  // Calculate total price
-  const totalPrice = cart.reduce((acc, item) => acc + parseFloat(item.totalPrice || 0), 0).toFixed(2);
-
-  // Add total amount at the end of the table
-  const finalY = doc.lastAutoTable.finalY + 10; // Position after the table
-  doc.setFontSize(14);
-  doc.text(`Total Amount: Rs. ${totalPrice}`, 10, finalY);
-
-  // Add footer (thank you message)
-  const pageHeight = doc.internal.pageSize.height;
-  doc.setFontSize(12);
-  doc.text("Thank you for purchasing!", doc.internal.pageSize.getWidth() / 2, pageHeight - 10, { align: 'center' });
-
-  // Save the PDF
-  doc.save("shopping-cart-bill.pdf");
-};
-
 useEffect(()=>{
   if(shouldUpdateCart){
     UpdateCartItem();
@@ -503,105 +514,201 @@ function UpdateCartItem(){
 };
 
     
-  const addToCart = (productName, quantity) => {
-    const response = axios.get(`http://localhost:3001/product/${productName}`);
-      const product = response.data;
-      const parsedQuantity = parseInt(quantity);
-      
-      if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
-        speak("Invalid quantity. Please try again.");
-        return;
-      }
-      
-      if (parsedQuantity > product.quantity) {
-        speak(`Only ${product.quantity} of ${product.proname} available. Please try again.`);
-        return;
-      }
-
-    const discountedPrice = product.price * (1 - product.discount / 100); // Apply discount
-    const additionalPrice = discountedPrice * quantity;
-    const existingProductIndex = cart.findIndex(item => item._id === product._id); // Check if product already exists in cart
-  
-    if (existingProductIndex >= 0) {
-      const updatedCart = [...cart];
-      const existingProduct = updatedCart[existingProductIndex];
-  
-      // Check if adding more exceeds available quantity
-      if (existingProduct.quantity + quantity > product.quantity) {
-        speak('Product out of stock');
-        return;
-      }
-  
-      // Update quantity and total price
-      existingProduct.quantity += quantity;
-      existingProduct.totalPrice = (parseFloat(existingProduct.totalPrice) + additionalPrice).toFixed(2);
-  
-      updatedCart[existingProductIndex] = existingProduct;
-  
-      setCart(updatedCart);
-  
-      speak(`${quantity} more of ${product.proname} has been added to your cart. Total quantity is now ${existingProduct.quantity}.`);
-    } else {
-      // Add product to cart if not already in
-      const cartItem = { 
-        ...product, 
-        quantity, 
-        totalPrice: additionalPrice.toFixed(2) 
-      };
-  
-      setCart([...cart, cartItem]);
-  
-      speak(`${quantity} of ${product.proname} has been added to your cart with a total price of $${cartItem.totalPrice}.`);
+  const addToCart = (product, quantity) => {
+  const discountedPrice = product.price * (1 - product.discount / 100);
+  const additionalPrice = discountedPrice * quantity;
+  const existingProductIndex = cart.findIndex(item => item.proname === product.proname);
+  if(product.quantity < quantity){
+    toast.info('Product out of stock')
+    speak('Product out of stock');
+    return 1;
+  }
+  if (existingProductIndex >= 0) {
+    const updatedCart = [...cart];
+    const existingProduct = updatedCart[existingProductIndex];
+    if(existingProduct.quantity +quantity > product.quantity){
+      toast.info('Product out of stock')
+      speak('Product out of stock');
+      return 1;
     }
-  };
-  
-const [quantities, setQuantities] = useState({});
-const handleQuantityChange = (productId, change) => {
-  setQuantities((prevQuantities) => {
-    const newQuantity = (prevQuantities[productId] || 1) + change;
-    const product = products.find(p => p._id === productId);
+    existingProduct.quantity += quantity;
+    existingProduct.totalPrice = (parseFloat(existingProduct.totalPrice) + additionalPrice).toFixed(2);
+    updatedCart[existingProductIndex] = existingProduct;
     
-    if (!product) return prevQuantities; // Ensure the product exists
-
-    return {
-      ...prevQuantities,
-      [productId]: Math.max(1, Math.min(newQuantity, product.quantity)), // Ensure quantity doesn't exceed available stock
+    setCart(updatedCart);
+    console.log("Cart first update",cart);
+    setShouldUpdateCart(true);
+    setCommand("");
+    setWaitingForProductName(false);
+    resetTranscript();
+    toast.success(`${quantity} more of ${product.proname} has been added to your cart. Total quantity is now ${existingProduct.quantity}.`)
+    speak(`${quantity} more of ${product.proname} has been added to your cart. Total quantity is now ${existingProduct.quantity}.`);
+  } else {
+    // Product not in the cart, add as new entry
+    const cartItem = { 
+      ...product, 
+      quantity, 
+      totalPrice: additionalPrice.toFixed(2) 
     };
-  });
-};
+    
+    setCart([...cart, cartItem]);
+    console.log("Cart",cart);
+    setShouldUpdateCart(true);
+      setCommand("");
+      setWaitingForProductName(false);
+      resetTranscript();
+    //UpdateCartItem();
+    toast(`${quantity} of ${product.proname} has been added to your cart with a total price of Rs.${cartItem.totalPrice}.`)
+    speak(`${quantity} of ${product.proname} has been added to your cart with a total price of Rupees.${cartItem.totalPrice}.`);
+  }
+    // //const response = axios.get(`http://localhost:3001/product/${productName}`);
+    // const matchedProducts = products.filter(item => item.proname === productitem.proname);
+    //   // const quantityMatch = quantity.match(/\d+/);
+    //   // console.log(quantityMatch +"quantitymatch")
+    //   // const quan = parseInt(quantityMatch[0], 10);
+    //   // console.log("quantity"+quan)
+    //   // const quantity = parseInt(quan);
+    //   // console.log(quan);
+    //   // if (isNaN(quantity) || parsedQuantity <= 0) {
+    //   //   speak("Invalid quantity. Please try again.");
+    //   //   return;
+    //   // }
+    //   console.log("matched Prod",matchedProducts)
+    //   if (quantity > matchedProducts.quantity) {
+    //     speak(`Only ${matchedProducts.quantity} of ${matchedProducts.proname} available. Please try again.`);
+    //     return;
+    //   }
 
-// Function to calculate the total price per product
-const calculateTotalPrice = (price, discount, quantity) => {
-  const discountedPrice = price * (1 - discount / 100);
-  return (discountedPrice * quantity).toFixed(2);
-};
-const removeItemFromCart=(id)=>{
+    // const discountedPrice = matchedProducts.price * (1 - matchedProducts.discount / 100); // Apply discount
+    // const additionalPrice = discountedPrice * quantity;
+    // const existingProductIndex = cart.findIndex(item => item._id === matchedProducts._id); // Check if product already exists in cart
+  
+    // if (existingProductIndex >= 0) {
+    //   const updatedCart = [...cart];
+    //   const existingProduct = updatedCart[existingProductIndex];
+  
+    //   // Check if adding more exceeds available quantity
+    //   if (existingProduct.quantity + quantity > matchedProducts.quantity) {
+    //     speak('Product out of stock');
+    //     return;
+    //   }
+  
+    //   // Update quantity and total price
+    //   existingProduct.quantity += quantity;
+    //   existingProduct.totalPrice = (parseFloat(existingProduct.totalPrice) + additionalPrice).toFixed(2);
+  
+    //   updatedCart[existingProductIndex] = existingProduct;
+  
+    //   setCart(updatedCart);
+    //   setShouldUpdateCart(true);
+    //   setCommand("");
+    //   setWaitingForProductName(false);
+    //   resetTranscript();
+    //   speak(`${quantity} more of ${matchedProducts.proname} has been added to your cart. Total quantity is now ${existingProduct.quantity}.`);
+    // } else {
+    //   // Add product to cart if not already in
+    //   const cartItem = { 
+    //     ...matchedProducts, 
+    //     quantity, 
+    //     totalPrice: additionalPrice.toFixed(2) 
+    //   };
+    //   console.log("cart Item",cartItem);
+    //   setCart([...cart, cartItem]);
+    //   setShouldUpdateCart(true);
+    //   setCommand("");
+    //   setWaitingForProductName(false);
+    //   resetTranscript();
+    //   speak(`${quantity} of ${matchedProducts.proname} has been added to your cart with a total price of $${cartItem.totalPrice}.`);
+    // }
+  };
+ 
+  // Function to handle quantity changes
+  const handleQuantityChange = (productId,change) => {
+    const product = products.filter(p => p.proname === productId)
+    const discountedPrice =product[0].price * (1 - product[0].discount / 100);
+    const additionalPrice = discountedPrice * change;
+    const existingProductIndex = cart.findIndex(item => item.proname === productId);
+  if (existingProductIndex >= 0) {
+    const updatedCart = [...cart];
+    const existingProduct = updatedCart[existingProductIndex];
+    if(existingProduct.quantity +change > product[0].quantity){
+      toast.info('Product out of stock')
+      speak('Product out of stock');
+      return;
+    }if(existingProduct.quantity+change < 1){
+      toast.info("Minimum value is 1");
+      return 1;
+    }
+    existingProduct.quantity += change;
+    console.log((parseFloat(existingProduct.totalPrice) + additionalPrice).toFixed(2))
+    existingProduct.totalPrice = (parseFloat(existingProduct.totalPrice) + additionalPrice).toFixed(2);
+    updatedCart[existingProductIndex] = existingProduct;
+    console.log(existingProduct)
+    setCart(updatedCart);
+    setShouldUpdateCart(true);
+     }
+    }
+
+const removeItemFromCart=(n)=>{
     console.log("before",cart);
-    var temp = JSON.parse(sessionStorage.getItem('cart'))
-    sessionStorage.setItem('cart', JSON.stringify(temp.filter(item => item._id !== id)));
-    setCart(JSON.parse(sessionStorage.getItem('cart')));
-    console.log("after",cart);
-
-}
-
+    if(user){
+      const email =user;
+      const status =2;
+      console.log("before send",cart)
+      axios.delete('http://localhost:3001/deleteCart', { 
+        params: {
+            email: email,
+            n: n
+        }
+      })
+      .then(response => {
+        fetchCart();
+        toast.success("Product deleted Successfully");
+        speak("Prodcut deleted Successfully")
+      })
+      .catch(err => {toast.warning(err);speak(err);console.error(err)});
+    
+    }else{
+      var temp = JSON.parse(sessionStorage.getItem('cart'))
+      sessionStorage.setItem('cart', JSON.stringify(temp.filter(item => item.proname !== n)));
+      setCart(JSON.parse(sessionStorage.getItem('cart')));
+      toast.success("Product Deleted Successfully");
+      speak(`Removed ${n} from your Cart..`);
+    }
+  }
+  function checkOut(){
+       if(user){
+         speak("Navigating to CheckOut page..")
+         navigate('/Checkout')
+       }else{
+        speak("user not login please login to checkout");
+        navigate('/Login')
+       }
+  }
+  function previewCart(){
+      if(cart.length>0){
+        speak(`Total products in your cart is ${cart.length}`);
+        for(item in cart){
+           speak(`${item.quantity} item of ${item.proname} Total price is ${item.totalPrice}.`)
+        }
+        speak(`And the total amount of these items is Rupees. ${cart.reduce((acc, item) => acc + parseFloat(item.totalPrice), 0).toFixed(2)}`)
+      }else{
+        speak("Your Cart is Empty.")
+      }
+      return true
+  }
   return (
     <>
   <Header
     isListening={isListening}
     startListening={startListening}
     stopListening={stopListening}
-  /><div className="main-container pro-main-container">
+  />
+  <ToastContainer/>
+  <div className="pro-main-container">
   <div className="container">
-  <div className="hp-textbox"> <input type='text' className='textp' placeholder='Tell Explore or Order...' value={transcript} readOnly></input><div className='svg'><FaMicrophone /></div> </div>
-    {/* <div className="product-list-section pro-product-list-section">
-      <h2>Products</h2>
-      <ul className="product-list pro-product-list">
-        {products.map((product, index) => (
-          <li key={index}>{product.proname}</li>
-        ))}
-      </ul>
-    </div> */}
-
+  <div className="hp-textbox"> <input type='text' className='textp' placeholder='Transcript.....' value={transcript} readOnly></input><div className='svg'><FaMicrophone /></div> </div>
+    
     <div>
       <h2>Shopping Cart</h2>
       <table cellPadding={10} className="pro-cart-table">
@@ -622,15 +729,19 @@ const removeItemFromCart=(id)=>{
               <td>{index + 1}</td>
               <td>{item.proname}</td>
               <td className="pro-quantity-control">
-                <button onClick={() => handleQuantityChange(item._id, -1)}>-</button>
-                {quantities[item._id] || item.quantity}
-                <button onClick={() => handleQuantityChange(item._id, 1)}>+</button>
+              <button onClick={() => handleQuantityChange(item.proname,-1)}>-</button>
+                          <input
+                            type="text"
+                            value={item.quantity|| 1}
+                            readOnly
+                            className="pro-quantity-box" />
+                          <button onClick={() => handleQuantityChange(item.proname,1)}>+</button>
               </td>
               <td>{item.discount}%</td>
               <td>{item.price}</td>
-              <td>{calculateTotalPrice(item.price, item.discount, quantities[item._id] || item.quantity)}</td>
+              <td>{item.totalPrice}</td>
               <td>
-                <button className="pro-remove-btn" onClick={() => removeItemFromCart(item._id)}>Remove</button>
+                <button className="pro-remove-btn" onClick={() => removeItemFromCart(item.proname)}>Remove</button>
               </td>
             </tr>
           ))}
@@ -639,8 +750,11 @@ const removeItemFromCart=(id)=>{
 
       <div className="total-amount pro-total-amount">
         <h3>Total Amount: Rs. {cart.reduce((acc, item) => acc + parseFloat(item.totalPrice), 0).toFixed(2)}</h3>
-        <button className="pro-print-btn" onClick={generatePDF} aria-label="generate PDF">
+        <button className="pro-print-btn" onClick={()=>{generatePDF(cart)}} aria-label="generate PDF">
           Print Bill
+        </button>
+        <button className="pro-print-btn" onClick={()=>{checkOut()}} aria-label="generate PDF">
+         CheckOut
         </button>
       </div>
     </div>
