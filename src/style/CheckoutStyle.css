@@ -47,35 +47,53 @@
     margin-top: 15px;
   }
   
-  .ch-back-button, .ch-place-order-button {
+  .ch-back-button, .ch-place-order-button{
     padding: 10px 20px;
     margin: 5px;
     border: none;
     border-radius: 5px;
-    background-color: #007bff;
+    background-color: #28a745;
     color: white;
     cursor: pointer;
     transition: background-color 0.3s;
   }
   
-  .ch-back-button:hover, .ch-place-order-button:hover {
-    background-color: #0056b3;
+  .ch-back-button:hover, .ch-place-order-button:hover{
+    background-color: #218838;
   }
-  
+   select{
+    width:max-content;
+    color:rgb(0, 128, 57);
+    border-radius: 5px;
+    border-color:rgb(3, 255, 16);
+   } 
   .ch-popup {
     text-align: center;
     padding: 20px;
     background-color: #f0f4f8;
     border-radius: 8px;
-    animation: popup 1s forwards;
+    animation: popup 3s infinite;
   }
-  
+  .loginerror{
+    align-items: center;
+    color:#0056b3;
+    padding: 50px;
+  }
+  #link{
+    text-decoration: none;
+    color:white;
+  }
   @keyframes popup {
     0% {
-      transform: scale(0);
+      transform: scaleX(0);
     }
+   
+    50%{
+      transform:scaleX(0.6)
+    }
+   
     100% {
-      transform: scale(1);
+      transform: scaleX(1);
     }
   }
   

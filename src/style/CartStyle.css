@@ -54,7 +54,10 @@
   border-radius: 4px;
   cursor: pointer;
 }
-
+#lowquantity{
+  color:red;
+  background-color: #218838;
+}
 .pro-cart-table button:hover {
   background-color: #218838;
 }

@@ -21,8 +21,8 @@ function Dashboard(){
   <aside className="ap-sidebar">
     <ul>
       <li>Home</li>
-      <li>Add Products</li>
-      <li>View Products</li>
+      <li><Link to='/DashBoard/AddProduct' id='link'>Add Products</Link></li>
+      <li><Link to='/DashBoard/ViewProduct' id='link'>View Products</Link></li>
       <li>Manage Transaction</li>
       <li>View Customer</li>
     </ul>

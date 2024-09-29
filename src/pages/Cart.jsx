@@ -181,6 +181,7 @@ const Cart = () => {
   const [shouldUpdateCart,setShouldUpdateCart] = useState(false);
   const navigate = useNavigate();
   const [addQuan,setAddQuan] = useState(0)
+  const [lowStock,setLowStock] = useState(false);
 
   const startListening = () => {
     resetTranscript();
@@ -352,7 +353,21 @@ const Cart = () => {
       }
       
     };
-  
+   const handleRemoveItem =(tran)=>{
+    const lowerTranscript = tran.trim().toLowerCase();
+    if(/yes/.test(lowerTranscript)){
+      setLowStock(false)
+      resetTranscript();
+      speak("Item removed from your cart. now checkout")
+      return;
+      
+    }else {
+      setLowStock(false)
+      resetTranscript();
+      speak("Item removed from your cart. now checkout")
+      return;
+    }
+   }
     // Waiting for the product name to add or remove items
     if (waitingForProductName) {
       const timer = setTimeout(() => {
@@ -374,7 +389,12 @@ const Cart = () => {
   
       return () => clearTimeout(timer);
     }
-  
+    if(lowStock){
+      const timer = setTimeout(() => {
+        handleRemoveItem(transcript);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
     // Waiting for the quantity to add to cart
     if (waitingForQuantity) {
       const timer = setTimeout(() => {
@@ -391,7 +411,7 @@ const Cart = () => {
   
     return () => clearTimeout(timer);
   
-  }, [transcript]);
+  }, [transcript,lowStock]);
   
   // Helper function to find similar products
   const findSimilarProducts = (productName,q=0) => {
@@ -678,8 +698,15 @@ const removeItemFromCart=(n)=>{
   }
   function checkOut(){
        if(user){
-         speak("Navigating to CheckOut page..")
-         navigate('/Checkout')
+        const flag = hasLowStock
+        console.log(flag)
+        if(flag){
+          speak("Some products has out of stock. so please remove first.")
+          setLowStock(true);
+        }else{
+           speak("Navigating to CheckOut page..")
+         //navigate('/Checkout')
+        }
        }else{
         speak("user not login please login to checkout");
         navigate('/Login')
@@ -697,6 +724,11 @@ const removeItemFromCart=(n)=>{
       }
       return true
   }
+  const hasLowStock = cart.some(item => {
+    const productInStock = products.find(prod => prod.proname === item.proname);
+    return productInStock && item.quantity < productInStock.quantity;
+  });
+
   return (
     <>
   <Header
@@ -725,7 +757,8 @@ const removeItemFromCart=(n)=>{
         </thead>
         <tbody>
           {cart.map((item, index) => (
-            <tr key={index}>
+
+            <tr key={index} style={products.filter(i=>i.proname== item.proname)[0].quantity < item.quantity ? { backgroundColor: 'red' } : {}}>
               <td>{index + 1}</td>
               <td>{item.proname}</td>
               <td className="pro-quantity-control">

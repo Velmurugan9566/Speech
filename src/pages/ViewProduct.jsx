@@ -72,8 +72,9 @@ const handleDeleteSelected = () => {
   }
 };
   const handleCategoryClick = (category) => {
+    console.log("handle cate",category);
     setSelectedCategory(category);
-    axios.get(`http://localhost:3001/products/${category}`)
+    axios.get(`http://localhost:3001/AdminProductsView/${category}`)
       .then(res => setProducts(res.data))
       .catch(err => toast.error("Error fetching products:", err));
   };
