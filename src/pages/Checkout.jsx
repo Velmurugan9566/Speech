@@ -199,7 +199,7 @@ function Checkout(){
       }, [cart]);
     
       const handlePlaceOrder = () => {
-        if (!paymentMethod && !orderMethod) {
+        if (!paymentMethod || !orderMethod) {
           toast.warning("Please Select the order Method and Delivery Method")
           speak("Please Select the order Method and Delivery Method")
           return;

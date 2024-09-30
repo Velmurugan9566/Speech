@@ -12,11 +12,11 @@ const UpdateProduct = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     proname: '',
-    quantity: '',
-    price: '',
+    quantity: 0,
+    price: 0,
     Subcategory: '',
     category: '',
-    discount: '',
+    discount: 0,
     Supp_id: ''
   });
   const [errors, setErrors] = useState({});
@@ -27,7 +27,7 @@ const UpdateProduct = () => {
   useEffect(() => {
     axios.get(`http://localhost:3001/getProduct/${id}`)
       .then(res => {
-        console.log(res.data)
+        //console.log(res.data)
         setFormData(res.data);
       })
       .catch(err => toast.error("Error fetching product details:", err));
@@ -56,20 +56,28 @@ const UpdateProduct = () => {
   }, [id]);
 
   const handleChange = (event) => {
+    const { name, value } = event.target;
+    const numericFields = ['quantity', 'price', 'discount'];
+    
+    const newValue = numericFields.includes(name) ? Number(value) : value;
+    console.log(`Changing ${name}: `, newValue); // Log the updated value
+    
     setFormData({
       ...formData,
-      [event.target.name]: event.target.value.toLowerCase()
+      [name]: newValue
     });
   };
+  
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    console.log("form",formData);
     axios.put(`http://localhost:3001/updateProduct/${id}`, formData)
       .then(msg => {
         toast.success("Product Updated Successfully");
         navigate('/DashBoard/ViewProduct', { state: { selectedCategory: formData.category } }); // Passing selected category
       })
-      .catch(err => toast.error("Error updating product:", err));
+      .catch(err => {toast.error("Error updating product:", err);console.log(err.data.errors);setErrors(err.data.errors)});
   };
   return (
     <div>

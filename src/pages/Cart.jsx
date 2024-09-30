@@ -705,7 +705,7 @@ const removeItemFromCart=(n)=>{
           setLowStock(true);
         }else{
            speak("Navigating to CheckOut page..")
-         //navigate('/Checkout')
+         navigate('/Checkout')
         }
        }else{
         speak("user not login please login to checkout");
@@ -726,7 +726,8 @@ const removeItemFromCart=(n)=>{
   }
   const hasLowStock = cart.some(item => {
     const productInStock = products.find(prod => prod.proname === item.proname);
-    return productInStock && item.quantity < productInStock.quantity;
+    console.log("pro",productInStock);
+    return productInStock && item.quantity > productInStock.quantity;
   });
 
   return (

@@ -22,7 +22,7 @@ function AdminHead() {
         <Link to='/DashBoard/AddProduct'>
           <button>Add Product</button>
         </Link>
-        <button>View Transaction</button>
+        <Link to='/DashBoard/ViewTransaction'><button>View Transaction</button></Link>
         <Link to='/DashBoard/ViewProduct'>
           <button>View Stock</button>
         </Link>
