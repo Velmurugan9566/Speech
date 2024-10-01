@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import { Doughnut, Line, Bar } from 'react-chartjs-2';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../style/ViewTransaction.css';
@@ -15,64 +15,98 @@ function ViewTransaction() {
     const [month, setMonth] = useState('');
     const [monthlyRevenue, setMonthlyRevenue] = useState([]);
     const [frequentItems, setFrequentItems] = useState([]);
+    const [loading, setLoading] = useState(true); // Add a loading state
 
+    // Fetch orders and date range together
     useEffect(() => {
-        fetchOrders();
-        fetchDateRange();
+        const fetchData = async () => {
+            try {
+                const [ordersRes, dateRangeRes] = await Promise.all([
+                    axios.get('http://localhost:3001/FetchOrders'),
+                    axios.get('http://localhost:3001/FetchOrders'),
+                ]);
+                setOrders(ordersRes.data);
+                setMinDate(dateRangeRes.data.minDate);
+                setMaxDate(dateRangeRes.data.maxDate);
+                setLoading(false); // Stop loading after data fetch
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                toast.error("Error fetching transaction data.");
+            }
+        };
+        fetchData();
+        getFrequentItems(); // Fetch frequent items initially
     }, []);
 
-    const fetchOrders = async () => {
-        const response = await axios.get('/api/orders');
-        setOrders(response.data);
+    // Fetch frequent items
+    const getFrequentItems = async () => {
+        try {
+            const response = await axios.get('http://localhost:3001/FrequentItems');
+            setFrequentItems(response.data);
+        } catch (error) {
+            console.error("Error fetching frequent items:", error);
+            toast.error("Error fetching frequent items.");
+        }
     };
 
-    const fetchDateRange = async () => {
-        const response = await axios.get('/api/orders/dateRange');
-        setMinDate(response.data.minDate);
-        setMaxDate(response.data.maxDate);
-    };
-
+    // Filter orders by date range
     const handleFilter = async () => {
-        const response = await axios.get('/api/orders/filter', {
-            params: { startDate, endDate }
-        });
-        setOrders(response.data);
+        if (!startDate || !endDate) {
+            toast.warn("Please select both start and end dates.");
+            return;
+        }
+        try {
+            const response = await axios.get('http://localhost:3001/FilterOrder', {
+                params: { startDate, endDate }
+            });
+            setOrders(response.data);
+        } catch (error) {
+            console.error("Error filtering orders:", error);
+            toast.error("Error filtering orders.");
+        }
     };
 
     const handleMonthChange = async (e) => {
         setMonth(e.target.value);
-        const response = await axios.get('/api/orders/revenue', { params: { month: e.target.value } });
-        setMonthlyRevenue(response.data);
+        try {
+            const response = await axios.get('http://localhost:3001/RevenueOrder', { 
+                params: { month: e.target.value } 
+            });
+            const data = response.data;
+    
+            if (Array.isArray(data)) {
+                setMonthlyRevenue(data);
+                console.log(monthlyRevenue)
+            } else {
+                setMonthlyRevenue([]);
+                console.error("Expected an array for monthly revenue, but got:", data);
+            }
+        } catch (error) {
+            console.error("Error fetching monthly revenue:", error);
+            setMonthlyRevenue([]); // Fallback to empty array if there's an error
+        }
     };
-
-    const getFrequentItems = async () => {
-        const response = await axios.get('/api/orders/frequentItems');
-        setFrequentItems(response.data);
-    };
-
-    useEffect(() => {
-        getFrequentItems();
-    }, []);
-
+     
     const revenueData = {
-        labels: monthlyRevenue.map(data => data.date),
+        labels: Array.isArray(monthlyRevenue) ? monthlyRevenue.map(data => data.date) : [],
         datasets: [{
             label: 'Total Revenue',
-            data: monthlyRevenue.map(data => data.totalRevenue),
+            data: Array.isArray(monthlyRevenue) ? monthlyRevenue.map(data => data.totalRevenue) : [],
             fill: false,
             backgroundColor: 'rgba(75,192,192,0.4)',
             borderColor: 'rgba(75,192,192,1)',
         }],
     };
-
+    
     const barData = {
-        labels: monthlyRevenue.map(data => data.date),
+        labels: Array.isArray(monthlyRevenue) ? monthlyRevenue.map(data => data.date) : [],
         datasets: [{
             label: 'Total Revenue',
-            data: monthlyRevenue.map(data => data.totalRevenue),
+            data: Array.isArray(monthlyRevenue) ? monthlyRevenue.map(data => data.totalRevenue) : [],
             backgroundColor: 'rgba(75,192,192,0.4)',
         }],
     };
+     // Prepare chart data
 
     const donutData = {
         labels: frequentItems.map(item => item.proname),
@@ -81,6 +115,10 @@ function ViewTransaction() {
             backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
         }],
     };
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <>
@@ -119,7 +157,7 @@ function ViewTransaction() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {orders.map((order, index) => (
+                                {orders.length > 0 ? orders.map((order, index) => (
                                     <tr key={index}>
                                         <td>{order._id}</td>
                                         <td>{order.userId}</td>
@@ -127,7 +165,7 @@ function ViewTransaction() {
                                         <td>{order.totalAmount}</td>
                                         <td>{order.paymentStatus}</td>
                                     </tr>
-                                ))}
+                                )) : <tr><td colSpan="5">No orders found</td></tr>}
                             </tbody>
                         </table>
                     </section>
