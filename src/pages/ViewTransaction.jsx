@@ -106,7 +106,7 @@ function ViewTransaction() {
             backgroundColor: 'rgba(75,192,192,0.4)',
         }],
     };
-     // Prepare chart data
+   
 
     const donutData = {
         labels: frequentItems.map(item => item.proname),

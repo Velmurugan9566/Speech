@@ -216,17 +216,16 @@ const Cart = () => {
     }
     }
   };
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/products");
+      setProducts(response.data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/products");
-        setProducts(response.data);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
     fetchProducts();
- 
     fetchCart();
   }, []);
   useEffect(() => {
@@ -698,6 +697,7 @@ const removeItemFromCart=(n)=>{
   }
   function checkOut(){
        if(user){
+        fetchProducts();
         const flag = hasLowStock
         console.log(flag)
         if(flag){
@@ -729,7 +729,19 @@ const removeItemFromCart=(n)=>{
     console.log("pro",productInStock);
     return productInStock && item.quantity > productInStock.quantity;
   });
-
+  //console.log(products);
+  function handleCartQuantity(item){
+    const original=products.filter(i=>i.proname== item.proname);
+    if(original.length>0){
+      console.log("original",original)
+      if(original[0].quantity<item.quantity){
+        return true
+      }
+      return false
+    }else{
+        return true
+    }
+  }
   return (
     <>
   <Header
@@ -759,7 +771,7 @@ const removeItemFromCart=(n)=>{
         <tbody>
           {cart.map((item, index) => (
 
-            <tr key={index} style={products.filter(i=>i.proname== item.proname)[0].quantity < item.quantity ? { backgroundColor: 'red' } : {}}>
+            <tr key={index} style={handleCartQuantity(item) ? { backgroundColor: '#4f75b8' } : {}}>
               <td>{index + 1}</td>
               <td>{item.proname}</td>
               <td className="pro-quantity-control">

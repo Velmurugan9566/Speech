@@ -5,11 +5,35 @@ import 'chart.js/auto'; // Import the auto-configuration for chart.js
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Link } from 'react-router-dom';
 import '../style/AdminDash.css';
+import Header from './AdminHead'
+import Aside from './AdminAside'
 
 function Dashboard() {
   const [lowQuantityData, setLowQuantityData] = useState([]);
   const [transactionList, setTransactionList] = useState([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isAsideOpen, setIsAsideOpen] = useState(true);
 
+  // Detect window resize and toggle between mobile and desktop views
+  const handleResize = () => {
+    setIsMobile(window.innerWidth <= 768);
+    if (window.innerWidth > 768) {
+      setIsAsideOpen(true); // Keep aside open on larger screens
+    } else {
+      setIsAsideOpen(false); // Hide aside on smaller screens
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  const toggleAside = () => {
+    setIsAsideOpen((prev) => !prev);
+  };
   // Fetch low quantity products
   useEffect(() => {
     axios.get('http://localhost:3001/products_low_quantity')
@@ -54,53 +78,47 @@ function Dashboard() {
   };
 
   return (
-    <>
-      <div className="ap-dashboard">
-        <aside className="ap-sidebar">
-          <ul>
-            <li>Home</li>
-            <li><Link to='/DashBoard/AddProduct' id='link'>Add Products</Link></li>
-            <li><Link to='/DashBoard/ViewProduct' id='link'>View Products</Link></li>
-            <li><Link to='/DashBoard/ViewTransaction' id='link'>Manage Transaction</Link></li>
-            <li>View Customer</li>
-          </ul>
-        </aside>
+    <> <div className="ap-dashboard">
+  <Header toggleAside={toggleAside} />
 
-        <div className="ap-main-content">
-          <header className="ap-header">Admin Dashboard</header>
+{/* Aside only visible when not mobile or manually toggled */}
+{!isMobile && isAsideOpen && <Aside />}
 
-          <section className="ap-stats-section">
-            <div className="ap-stat-box">
-              <h3>Total Website Viewers</h3>
-              <p>12</p>
-            </div>
-            <div className="ap-stat-box">
-              <h3>Total Orders</h3>
-              <p>0</p>
-            </div>
-          </section>
-
-          {/* Bar Chart for Low Quantity Products */}
-          <section className="ap-chart-section">
-            <h3>Low Quantity Products</h3>
-            <div className="ap-chart-container">
-              <Bar data={barData} />
-            </div>
-          </section>
-
-          {/* Pie Chart for Today's Transactions */}
-          <section className="ap-chart-section">
-            <h3>Today's Transactions</h3>
-            <div className="ap-chart-container">
-              <Pie data={pieData} />
-              {transactionData ?(
-                <><h4>Total Completed :{transactionData.completed}</h4>
-                <h4>Total Pending :{transactionData.pending}</h4></>
-              ):(<h4>No Data</h4>)}
-            </div>
-          </section>
+<div className={`ap-main-content ${!isAsideOpen ? 'ap-full-width' : ''}`}>
+      <section className="ap-stats-section">
+        <div className="ap-stat-box">
+          <h3>Total Website Viewers</h3>
+          <p>12</p>
         </div>
-      </div>
+        <div className="ap-stat-box">
+          <h3>Total Orders</h3>
+          <p>0</p>
+        </div>
+      </section>
+
+      <section className="ap-chart-section">
+        <h3>Low Quantity Products</h3>
+        <div className="ap-chart-container">
+          <Bar data={barData} />
+        </div>
+      </section>
+
+      <section className="ap-chart-section">
+        <h3>Today's Transactions</h3>
+        <div className="ap-chart-container">
+          <Pie data={pieData} />
+          {transactionData ? (
+            <>
+              <h4>Total Completed: {transactionData.completed}</h4>
+              <h4>Total Pending: {transactionData.pending}</h4>
+            </>
+          ) : (
+            <h4>No Data</h4>
+          )}
+        </div>
+      </section>
+    </div>
+  </div>
     </>
   );
 }

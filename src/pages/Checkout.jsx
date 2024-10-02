@@ -219,6 +219,7 @@ function Checkout(){
       }
 // Function to place an order
 const placeOrder = async () => {
+  if(cart.length >0 ){
   try {
     const response = await axios.post('http://localhost:3001/placeOrder', {
       user,
@@ -235,6 +236,10 @@ const placeOrder = async () => {
   } catch (error) {
     console.error('There was an error placing the order', error);
   }
+}else{
+  toast.warning("Your cart is empty");
+  speak("Your cart is empty");
+}
 };
 
     return(
@@ -263,7 +268,8 @@ const placeOrder = async () => {
             </tr>
           </thead>
           <tbody>
-            {cart.map((item, index) => (
+            {cart.length >0 ?(
+            cart.map((item, index) => (
               <tr key={index}>
                 <td>{index+1}</td>
                 <td>{item.proname}</td>
@@ -271,7 +277,9 @@ const placeOrder = async () => {
                 <td>Rs.{item.price}</td>
                 <td>Rs.{item.totalPrice}</td>
               </tr>
-            ))}
+            ))
+          ):
+          <tr align='center' ><td></td><td></td><td><h2>No Items</h2> </td><td></td></tr>}
           </tbody>
         </table>
         <div className="ch-grand-total">
