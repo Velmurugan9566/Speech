@@ -6,6 +6,7 @@ import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 import "../style/CheckoutStyle.css"; 
 import Header from './UserHeader'
+import Popup from './Popup';
 import { FaUser, FaShoppingCart,FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
@@ -22,6 +23,7 @@ function Checkout(){
       const [orderPlaced, setOrderPlaced] = useState(false);
       const [orderMethod,setOrderMethod] = useState('')
       const[waitingOrderMethod,setWaitingOrderMethod]=useState(true);
+      const[showPopup,setShowPopup] =useState(false);
       const [waitingPaymentMethod,setWaitingPaymentMethod] =useState(false);
       const navigate = useNavigate();
    
@@ -162,7 +164,7 @@ function Checkout(){
           console.log("fetch");
           axios.get(`http://localhost:3001/fetchCart/${user}`)
           .then(res=>{console.log(res);
-            console.log("cart",res.data);
+            //console.log("cart",res.data);
             setCart(res.data);})
          .catch(err=>console.log(err))
           
@@ -178,7 +180,7 @@ function Checkout(){
           console.log("fetch User");
           axios.get('http://localhost:3001/getuser',{params: {name:user}})
           .then(response =>{
-            console.log("user",response.data);
+           // console.log("user",response.data);
             setUser(response.data.detail);})
           
         } catch (error) {
@@ -204,11 +206,12 @@ function Checkout(){
           speak("Please Select the order Method and Delivery Method")
           return;
         }else{
-          console.log(paymentMethod,orderMethod)
+          
           placeOrder();
+          
           //toast.success("order Placed successfully")
         }
-        //setOrderPlaced(true);
+        
       };
     
       const handlePaymentChange = (e) => {
@@ -229,7 +232,17 @@ const placeOrder = async () => {
       grandTotal
     });
     if (response.status === 200) {
+      console.log(response)
       toast.success("Order placed successfully")
+      const orderId = response.data.orderId; // Assuming the response contains the order ID
+      navigate('/bill', { state: { user, cart, paymentMethod, orderMethod, grandTotal, orderId } });
+   
+      setShowPopup(true);
+      setOrderPlaced(true);
+    //   const timer = setTimeout(() => {
+    //       setShowPopup(false);
+    // }, 8000);
+    // return () => clearTimeout(timer);
     } else {
       toast.warning('Failed to place the order')
     }
@@ -237,12 +250,13 @@ const placeOrder = async () => {
     console.error('There was an error placing the order', error);
   }
 }else{
+  setShowPopup(false)
   toast.warning("Your cart is empty");
   speak("Your cart is empty");
 }
 };
 
-    return(
+  return(
         <>
         {user ? (
        <>
@@ -324,10 +338,14 @@ const placeOrder = async () => {
           </div>
         </div>
       ) : (
-        <div className="ch-popup">
+        <>
+        <Popup showPopup={showPopup}/>
+         {/* <div className="ch-popup">
           <h2>Order Placed Successfully!</h2>
           <p>Your order will be processed shortly.</p>
-        </div>
+        </div> */}
+        </>
+       
       )}
     </div>
     </> ) : (

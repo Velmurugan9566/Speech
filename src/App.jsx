@@ -18,6 +18,7 @@ import RegisterLogin from "./pages/UserRegistration.jsx";
 import Profile from "./pages/UserProfile.jsx";
 import Login from "./pages/UserLogin.jsx"
 import Checkout from "./pages/Checkout.jsx"
+import BillStatement from './pages/BillDetails.jsx';
 function App() {
   return (
     <>
@@ -37,6 +38,7 @@ function App() {
          <Route path='/Profile' element={<Profile/>}></Route>
          <Route path='/Login' element={<Login/>}></Route>
          <Route path='/Checkout' element={<Checkout/>}></Route>
+         <Route path='/bill' element={<BillStatement />}></Route>
       </Routes>
       </BrowserRouter>
 

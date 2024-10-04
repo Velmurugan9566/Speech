@@ -1,0 +1,45 @@
+.bill-container {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+  }
+  
+  .bill-title {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .bill-summary {
+    margin-bottom: 20px;
+  }
+  
+  .bill-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .bill-table th, .bill-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .bill-actions {
+    text-align: center;
+  }
+  
+  .bill-print-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .bill-print-button:hover {
+    background-color: #0056b3;
+  }
+  

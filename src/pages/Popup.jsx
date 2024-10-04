@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import './PopupStyle.css';
+import '../style/PopupStyle.css';
 
 const Popup = ({ showPopup }) => {
   const [showConfetti, setShowConfetti] = useState(false);
+  
 
   useEffect(() => {
     if (showPopup) {
       // Show confetti when popup appears
       setShowConfetti(true);
+      showPopup=false;
       // Remove confetti after 3 seconds
       const timer = setTimeout(() => {
         setShowConfetti(false);
-      }, 3000);
+        showPopup=false;
+      }, 8000);
       return () => clearTimeout(timer);
     }
   }, [showPopup]);
@@ -31,7 +34,7 @@ const Popup = ({ showPopup }) => {
 };
 
 const Confetti = () => {
-  const confettiCount = 150;
+  const confettiCount = 250;
   const confettiElements = [];
 
   for (let i = 0; i < confettiCount; i++) {
