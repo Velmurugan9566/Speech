@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
 import Header from './AdminHead';
+import Aside from './AdminAside';
 import { ToastContainer, toast } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
@@ -27,6 +28,34 @@ const AdminProductForm = () => {
   const [listSupplier, setListSupplier] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [load, setLoad] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+const [isAsideOpen, setIsAsideOpen] = useState(window.innerWidth > 768); // Initially set based on screen size
+
+// Detect window resize and toggle between mobile and desktop views
+const handleResize = () => {
+  const isNowMobile = window.innerWidth <= 768;
+  setIsMobile(isNowMobile);
+  
+  // Automatically set aside state based on the current window size
+  setIsAsideOpen(!isNowMobile); // Show aside if it's not mobile
+};
+
+useEffect(() => {
+  // Run on component mount to check initial screen size
+  handleResize();
+
+  // Add resize listener
+  window.addEventListener('resize', handleResize);
+
+  // Cleanup listener on component unmount
+  return () => {
+    window.removeEventListener('resize', handleResize);
+  };
+}, []);
+
+const toggleAside = () => {
+  setIsAsideOpen((prev) => !prev);
+};
 
   useEffect(() => {
     setnewcate("");
@@ -184,10 +213,16 @@ const AdminProductForm = () => {
 
   return (
     <div>
-      <Header/>
+      {isMobile && !isAsideOpen && <Header toggleAside={toggleAside}/>}
+   
+     
       <ToastContainer />
       <main>
+      {!isMobile && isAsideOpen && <header className="tra-header">Admin Panel</header>}
+      {!isMobile && isAsideOpen && <Aside />}
+      
       <div className="container">
+
         <h2>Insert Product Details</h2>
         <form className="product-form" onSubmit={handleSubmit}>
           <div>

@@ -19,6 +19,7 @@ import Profile from "./pages/UserProfile.jsx";
 import Login from "./pages/UserLogin.jsx"
 import Checkout from "./pages/Checkout.jsx"
 import BillStatement from './pages/BillDetails.jsx';
+import ViewCustomer from './pages/ViewCustomer.jsx'
 function App() {
   return (
     <>
@@ -34,6 +35,7 @@ function App() {
          <Route path='/DashBoard/ViewProduct' element={<ViewProducts/>}></Route>
          <Route path='DashBoard/ViewTransaction' element={<ViewTransaction/>}></Route>
          <Route path='/DashBoard/UpdateProudct/:id' element={<UpdateProduct/>}></Route>
+         <Route path='/DashBoard/ViewCustomer' element={<ViewCustomer/>}></Route>
          <Route path='/UserRegistration' element={<RegisterLogin/>} ></Route>
          <Route path='/Profile' element={<Profile/>}></Route>
          <Route path='/Login' element={<Login/>}></Route>

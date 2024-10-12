@@ -1,10 +1,6 @@
 /* Main container styling */
 .vp-container {
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #e0f7fa, #b2dfdb);
+padding-left: 25%;
 }
 
 /* Categories section */
@@ -40,7 +36,9 @@
   border-radius: 8px;
   overflow: hidden;
 }
-
+.catename:hover{
+  cursor:pointer;
+}
 .vp-product-table th,
 .vp-product-table td {
   padding: 10px;
@@ -78,6 +76,10 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .vp-container{
+    padding-top: 20%;
+    padding-left: 10%;
+  }
   .vp-category-section {
     grid-template-columns: 1fr; /* One column for mobile */
   }
@@ -90,3 +92,4 @@
     padding: 8px 10px;
   }
 }
+

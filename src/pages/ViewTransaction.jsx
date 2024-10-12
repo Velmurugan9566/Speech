@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import { Doughnut, Line, Bar } from 'react-chartjs-2';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Header from './AdminHead';
+import Aside from './AdminAside'
 import '../style/ViewTransaction.css';
 
 function ViewTransaction() {
@@ -16,6 +18,35 @@ function ViewTransaction() {
     const [monthlyRevenue, setMonthlyRevenue] = useState([]);
     const [frequentItems, setFrequentItems] = useState([]);
     const [loading, setLoading] = useState(true); // Add a loading state
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+const [isAsideOpen, setIsAsideOpen] = useState(window.innerWidth > 768); // Initially set based on screen size
+
+// Detect window resize and toggle between mobile and desktop views
+const handleResize = () => {
+  const isNowMobile = window.innerWidth <= 768;
+  setIsMobile(isNowMobile);
+  
+  // Automatically set aside state based on the current window size
+  setIsAsideOpen(!isNowMobile); // Show aside if it's not mobile
+};
+
+useEffect(() => {
+  // Run on component mount to check initial screen size
+  handleResize();
+
+  // Add resize listener
+  window.addEventListener('resize', handleResize);
+
+  // Cleanup listener on component unmount
+  return () => {
+    window.removeEventListener('resize', handleResize);
+  };
+}, []);
+
+const toggleAside = () => {
+  setIsAsideOpen((prev) => !prev);
+};
+
 
     // Fetch orders and date range together
     useEffect(() => {
@@ -106,13 +137,38 @@ function ViewTransaction() {
             backgroundColor: 'rgba(75,192,192,0.4)',
         }],
     };
-   
+    const colorGen=()=>{
+      var count= frequentItems.length;
+      var colors=[];
+      for(let j=1;j<=count;j++){
+        const letters = '0123456789ABCDEFabcdef';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        if(color in colors){
+            j--;
+        }else{
+            colors.push(color);
+        }
+      }
+      return colors; 
+    }
+    //console.log(colorGen())
+    const barFrequent ={
+        labels:frequentItems.map(i=>i.proname),
+        datasets:[{
+            label:'Low quantity Products',
+            data:frequentItems.map(item=>item.quantity),
+            backgroundColor: colorGen()
+        }]
+    }
 
     const donutData = {
         labels: frequentItems.map(item => item.proname),
         datasets: [{
             data: frequentItems.map(item => item.quantity),
-            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+            backgroundColor: colorGen(),
         }],
     };
 
@@ -123,19 +179,18 @@ function ViewTransaction() {
     return (
         <>
             <ToastContainer />
+
             <div className="tra-dashboard">
-                <aside className="tra-sidebar">
-                    <ul>
-                        <li>Home</li>
-                        <li><Link to='/DashBoard/AddProduct' id='link'>Add Products</Link></li>
-                        <li><Link to='/DashBoard/ViewProduct' id='link'>View Products</Link></li>
-                        <li><Link to='/DashBoard/ViewTransaction' id='link'>View Transaction</Link></li>
-                        <li>View Customer</li>
-                    </ul>
-                </aside>
+            {isMobile && !isAsideOpen && <Header toggleAside={toggleAside}/>}
+                 {!isMobile && isAsideOpen &&<aside className="tra-sidebar">
+                         <Aside />
+                    </aside>}
+  
+                
 
                 <div className="tra-main-content">
-                    <header className="tra-header">View Transactions</header>
+                {!isMobile && isAsideOpen &&  <header className="tra-header">View Transactions</header>}
+                   
                     <section className="tra-filter-section">
                         <label>Start Date: </label>
                         <input type="date" value={startDate} min={minDate} max={maxDate} onChange={(e) => setStartDate(e.target.value)} />
@@ -173,6 +228,8 @@ function ViewTransaction() {
                     <section className="tra-chart-section">
                         <h3>Frequently Purchased Items</h3>
                         <Doughnut data={donutData} />
+                        <Bar data={barFrequent}/>
+
 
                         <h3>Daily Revenue for Selected Month</h3>
                         <select onChange={handleMonthChange}>

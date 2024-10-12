@@ -12,29 +12,34 @@ function Dashboard() {
   const [lowQuantityData, setLowQuantityData] = useState([]);
   const [transactionList, setTransactionList] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [isAsideOpen, setIsAsideOpen] = useState(true);
+const [isAsideOpen, setIsAsideOpen] = useState(window.innerWidth > 768); // Initially set based on screen size
 
-  // Detect window resize and toggle between mobile and desktop views
-  const handleResize = () => {
-    setIsMobile(window.innerWidth <= 768);
-    if (window.innerWidth > 768) {
-      setIsAsideOpen(true); // Keep aside open on larger screens
-    } else {
-      setIsAsideOpen(false); // Hide aside on smaller screens
-    }
+// Detect window resize and toggle between mobile and desktop views
+const handleResize = () => {
+  const isNowMobile = window.innerWidth <= 768;
+  setIsMobile(isNowMobile);
+  
+  // Automatically set aside state based on the current window size
+  setIsAsideOpen(!isNowMobile); // Show aside if it's not mobile
+};
+
+useEffect(() => {
+  // Run on component mount to check initial screen size
+  handleResize();
+
+  // Add resize listener
+  window.addEventListener('resize', handleResize);
+
+  // Cleanup listener on component unmount
+  return () => {
+    window.removeEventListener('resize', handleResize);
   };
+}, []);
 
-  useEffect(() => {
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  const toggleAside = () => {
-    setIsAsideOpen((prev) => !prev);
-  };
-  // Fetch low quantity products
+const toggleAside = () => {
+  setIsAsideOpen((prev) => !prev);
+};
+// Fetch low quantity products
   useEffect(() => {
     axios.get('http://localhost:3001/products_low_quantity')
       .then((response) => setLowQuantityData(response.data))
@@ -78,13 +83,13 @@ function Dashboard() {
   };
 
   return (
-    <> <div className="ap-dashboard">
-  <Header toggleAside={toggleAside} />
-
-{/* Aside only visible when not mobile or manually toggled */}
+    <> 
+    {isMobile && !isAsideOpen && <Header toggleAside={toggleAside}/>}
+    <div className="ap-dashboard">
 {!isMobile && isAsideOpen && <Aside />}
 
-<div className={`ap-main-content ${!isAsideOpen ? 'ap-full-width' : ''}`}>
+<div className={`ap-main-content`}>
+  {!isMobile && isAsideOpen && <header className="tra-header">Admin Panel</header>}
       <section className="ap-stats-section">
         <div className="ap-stat-box">
           <h3>Total Website Viewers</h3>

@@ -1,0 +1,62 @@
+.vus-container {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .vus-aside {
+    width: 250px;
+    background: #f4f4f4;
+    padding: 20px;
+    transition: all 0.3s;
+  }
+  
+  .vus-open {
+    display: block;
+  }
+  
+  .vus-closed {
+    display: none;
+  }
+  
+  .vus-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+  .vus-content {
+    flex-grow: 1;
+    padding: 20px;
+  }
+  
+  .vus-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .vus-table th, .vus-table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+  
+  .vus-order-details {
+    background-color: #e9ecef;
+    padding: 15px;
+    border: 1px solid #ccc;
+  }
+  
+  .vus-chart-container {
+    margin-top: 30px;
+  }
+  
+  .vus-show-orders-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  

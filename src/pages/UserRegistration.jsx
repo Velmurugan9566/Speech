@@ -19,7 +19,7 @@ const RegistrationForm = () => {
     password: '',
     confirmPassword: '', // Adding confirm password
   });
-
+   const navigate =useNavigate();
   const [errors, setErrors] = useState({}); // To hold validation errors
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -105,11 +105,13 @@ const RegistrationForm = () => {
           console.log(response.data)
           if (response.data.status == 3) {
             toast.success("Registration Successful..")
+            navigate(-1)
           }else if(response.data.status == 2){
             setErrorMessage(response.data.message);
             toast.warning("Fields Contains Some Mistake");
           }else if(response.data.status==1){
             toast.warning("Email id already Exists..")
+            
           }
         })
         .catch(err=>{

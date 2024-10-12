@@ -2,7 +2,8 @@ import React, { useEffect, useState,useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import Header from './AdminHead';
-//import '../style/ViewProducts.css';
+import Aside from './AdminAside';
+import '../style/ViewProducts.css';
 import 'primereact/resources/themes/saga-blue/theme.css';  // Choose your preferred theme
 //import 'primereact/resources/primereact.min.css';           // Core CSS
 import 'primeicons/primeicons.css';    
@@ -21,6 +22,35 @@ const ViewProducts = () => {
   const [renameMode, setRenameMode] = useState(null); // Track the category being renamed
   const [newCategoryName, setNewCategoryName] = useState('');
   const [delcat, setdelcat] = useState('')
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+const [isAsideOpen, setIsAsideOpen] = useState(window.innerWidth > 768); // Initially set based on screen size
+
+// Detect window resize and toggle between mobile and desktop views
+const handleResize = () => {
+  const isNowMobile = window.innerWidth <= 768;
+  setIsMobile(isNowMobile);
+  
+  // Automatically set aside state based on the current window size
+  setIsAsideOpen(!isNowMobile); // Show aside if it's not mobile
+};
+
+useEffect(() => {
+  // Run on component mount to check initial screen size
+  handleResize();
+
+  // Add resize listener
+  window.addEventListener('resize', handleResize);
+
+  // Cleanup listener on component unmount
+  return () => {
+    window.removeEventListener('resize', handleResize);
+  };
+}, []);
+
+const toggleAside = () => {
+  setIsAsideOpen((prev) => !prev);
+};
+
 
   useEffect(() => {
     axios.get('http://localhost:3001/categorieswithcount')
@@ -103,9 +133,11 @@ const handleDeleteSelected = () => {
   return (
     <div>
       <ToastContainer />
-      <Header/>
-
-      <div className="container">
+      {isMobile && !isAsideOpen && <Header toggleAside={toggleAside}/>}
+      {!isMobile && isAsideOpen && <header className="tra-header">Admin Panel</header>}
+     {!isMobile && isAsideOpen && <Aside />}
+      
+      <div className="vp-container">
         <h2>Available Categories</h2>
         <table>
           { categories.length>0 ?
@@ -121,10 +153,11 @@ const handleDeleteSelected = () => {
                   /></td>
                  <td><button onClick={() => handleRenameCategory(category.category)}>Rename</button></td>
                  <td> <button onClick={() => setRenameMode(null)}>Cancel</button></td>
-                </tr>
+               </tr>
+
               ) : (
                 <tr>
-                  <td><span onClick={() => handleCategoryClick(category.category)}>
+                  <td><span onClick={() => handleCategoryClick(category.category)} className='catename'>
                     {category.category} ({category.productCount})
                   </span></td>
                  <td> <button onClick={() => setRenameMode(category.category)}>Rename</button></td>
@@ -136,7 +169,8 @@ const handleDeleteSelected = () => {
                 <Button onClick={() => {setVisible(true),setdelcat(category.category)}} icon="pi pi-check" label="Delete" />
                       </div>
                  </td>
-                </tr>
+                  </tr>
+               
               )}
             </tbody>
           )):<tbody><tr><td>No Categories are Available</td></tr></tbody>}
@@ -147,7 +181,7 @@ const handleDeleteSelected = () => {
         <div>
           <h3>Products in {selectedCategory}</h3>
           <button onClick={handleDeleteSelected}>Delete Selected</button>
-          <table className="table table-responsive">
+          <table  className='vp-product-table'>
             <thead>
               <tr>
                 <th>Select</th>
@@ -164,7 +198,7 @@ const handleDeleteSelected = () => {
             </thead>
             <tbody>
               {products.map((product, index) => (
-                <tr key={product._id} className={product.quantity < 20 ? 'low-stock' : ''}>
+                <tr key={product._id} className={product.quantity < 10 ? 'low-stock' : ''}>
                   <td>
                     <input
                       type="checkbox"
@@ -190,9 +224,7 @@ const handleDeleteSelected = () => {
         </div>
       )}
     </div>
-    <footer className="footer">
-      <p>© 2024 Admin Panel. All rights reserved.</p>
-    </footer>
+   
   </div>
 );
 }
