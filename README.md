@@ -1,6 +1,6 @@
-#**Hey welcome to my project**
+# ** Hey welcome to my project **
 
-                **VOICE BASED SHOPPING IN SUPERMARKET"**
+                ** VOICE BASED SHOPPING IN SUPERMARKET **
 
 
 # React + Vite
