@@ -17,7 +17,7 @@ function Checkout(){
    if(user){
     const [isListening, setIsListening] = useState(false);
     const [userDetail,setUser] = useState({});
-    const [cart, setCart] = useState([]); // Mock cart data
+    const [cart, setCart] = useState([]); 
       const [grandTotal, setGrandTotal] = useState(0);
       const [paymentMethod, setPaymentMethod] = useState('');
       const [orderPlaced, setOrderPlaced] = useState(false);
@@ -60,12 +60,12 @@ function Checkout(){
             stopListening();
             return true;
           }
-          if (/home/.test(lowerTranscript)) {
-            resetTranscript();
-            speak("Navigating to Exploring Page");
-            navigate("/home");
-            return true;
-          }
+          // if (/home/.test(lowerTranscript)) {
+          //   resetTranscript();
+          //   speak("Navigating to Exploring Page");
+          //   navigate("/");
+          //   return true;
+          // }
           if (/explore/.test(lowerTranscript)) {
             resetTranscript();
             speak("Navigating to Exploring Page");
@@ -162,7 +162,7 @@ function Checkout(){
         if(user){
         try { 
           console.log("fetch");
-          axios.get(`http://localhost:3001/fetchCart/${user}`)
+          axios.get(`${import.meta.env.VITE_API_URL}/fetchCart/${user}`)
           .then(res=>{console.log(res);
             //console.log("cart",res.data);
             setCart(res.data);})
@@ -178,7 +178,7 @@ function Checkout(){
         if(user){
         try { 
           console.log("fetch User");
-          axios.get('http://localhost:3001/getuser',{params: {name:user}})
+          axios.get(`${import.meta.env.VITE_API_URL}/getuser`,{params: {name:user}})
           .then(response =>{
            // console.log("user",response.data);
             setUser(response.data.detail);})
@@ -195,7 +195,7 @@ function Checkout(){
         
       },[])
       useEffect(() => {
-        // Calculate the grand total
+       
         const total = cart.reduce((acc, item) => acc + item.totalPrice, 0);
         setGrandTotal(total.toFixed(2));
       }, [cart]);
@@ -206,9 +206,7 @@ function Checkout(){
           speak("Please Select the order Method and Delivery Method")
           return;
         }else{
-          
           placeOrder();
-          
           //toast.success("order Placed successfully")
         }
         
@@ -220,11 +218,11 @@ function Checkout(){
       const handleDeliveryChange=(e)=>{
         setOrderMethod(e.target.value);
       }
-// Function to place an order
+
 const placeOrder = async () => {
   if(cart.length >0 ){
   try {
-    const response = await axios.post('http://localhost:3001/placeOrder', {
+    const response = await axios.post(`${import.meta.env.VITE_API_URL}/placeOrder`, {
       user,
       cart,
       paymentMethod,
@@ -234,8 +232,8 @@ const placeOrder = async () => {
     if (response.status === 200) {
       console.log(response)
       toast.success("Order placed successfully")
-      const orderId = response.data.orderId; // Assuming the response contains the order ID
-      navigate('/bill', { state: { user, cart, paymentMethod, orderMethod, grandTotal, orderId } });
+      const orderId = response.data.orderId; 
+            navigate('/bill', { state: { user, cart, paymentMethod, orderMethod, grandTotal, orderId } });
    
       setShowPopup(true);
       setOrderPlaced(true);

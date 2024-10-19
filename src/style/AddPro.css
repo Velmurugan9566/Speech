@@ -179,12 +179,17 @@ footer p {
 margin: 0;
 font-size: 14px;
 }
-
+.app-container{
+    padding-left: 280px;
+}
 /* Responsive styling */
 @media screen and (max-width: 768px) {
 nav button {
     margin: 0 5px;
     padding: 6px 8px;
+}
+.app-container{
+    padding-top: 80px;
 }
 
 header h2 {

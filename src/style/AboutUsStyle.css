@@ -1,0 +1,52 @@
+/* General container styling */
+.ab-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+  }
+  
+  .ab-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+  
+  /* Section default styles */
+  .ab-section {
+    opacity: 1;
+    transform: translateY(100px); /* Initially shifted down */
+    transition: all 0.6s ease-in-out; /* Smooth transition for visibility */
+    margin-bottom: 40px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* When a section becomes visible */
+  .ab-visible {
+    opacity: 2;
+    transform: translateY(0); /* Move into original position */
+  }
+  
+  /* Section titles */
+  .ab-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+  
+  /* Section content */
+  .ab-section p {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .ab-section h2 {
+      font-size: 1.2rem;
+    }
+  
+    .ab-section p {
+      font-size: 0.9rem;
+    }
+  }
+  

@@ -29,7 +29,7 @@ const ViewCustomerDetails = () => {
   
   const fetchCustomers = async () => {
     // Fetch customer data (mockup)
-    const customerData = await fetch('http://localhost:3001/customersWithOrder').then(res => res.json());
+    const customerData = await fetch(`${import.meta.env.VITE_API_URL}/customersWithOrder`).then(res => res.json());
     
     setCustomers(customerData);
     customers.map(i=>console.log(i.user.name))

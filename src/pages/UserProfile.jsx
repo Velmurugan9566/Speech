@@ -38,7 +38,7 @@ function App() {
     }
   }, [user]);
 function fetchUser(){
-  axios.get('http://localhost:3001/getuser',{params: {name:user}})
+  axios.get(`${import.meta.env.VITE_API_URL}/getuser`,{params: {name:user}})
       .then(res =>{
         if(res.data.status ==1){
           setUserData(res.data.detail)
@@ -175,7 +175,7 @@ function fetchUser(){
 
     if (!formErrors) {
     try {
-      const response = await axios.put(`http://localhost:3001/update-user/${userData._id}`, formData); 
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/update-user/${userData._id}`, formData); 
       if (response.data.success) {
         fetchUser();
         toast.success('User updated successfully!');

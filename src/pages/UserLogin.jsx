@@ -8,13 +8,14 @@ import "../style/LoginPage.css"; // Custom styles
 import ReactPopup from 'reactjs-popup'; // Popup for error handling
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
-
+import Spinner from 'react-bootstrap/Spinner';
 function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [error, setError] = useState('');
+  const [load,setLoad] = useState(false);
   
   const [cart, setCart] = useState(() => JSON.parse(sessionStorage.getItem('cart')) || []);
   const { transcript, resetTranscript } = useSpeechRecognition();
@@ -58,17 +59,18 @@ function LoginPage() {
   const handleSubmit = async (e) => {
     e && e.preventDefault();
     setError(''); // Reset error
+    setLoad(true);
     try {
-        const res = await axios.post('http://localhost:3001/login', { email, password });
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/login`, { email, password });
         const data = res.data;
-
+        setLoad(false)
         if (data.status == 1) {
             sessionStorage.setItem('userid', email); // Store session variable
             toast.success("Login successful! Redirecting...");
 
             if (cart && cart.length > 0) {
                 const status = 1;
-                const result = await axios.put('http://localhost:3001/updateCart', { cart, email, status });
+                const result = await axios.put(`${import.meta.env.VITE_API_URL}/updateCart`, { cart, email, status });
                 console.log("Cart updated:", result.data);
                 sessionStorage.setItem('cart', JSON.stringify([])); // Clear cart in session storage
             }
@@ -81,6 +83,7 @@ function LoginPage() {
             toast.error("Incorrect password. Please try again.");
         }  
     } catch (err) {
+      setLoad(false)
         toast.error("Error logging in. Please try again.");
         console.error(err);
     }
@@ -121,7 +124,17 @@ function LoginPage() {
               required
             />
           </div>
-          <button type="submit" className="login-btn">Login</button>
+          {
+              load ?
+                <button className='btn btn-success w-100 rounded-2'>
+                  <Spinner animation='border' variant='light'>
+                  </Spinner>
+                </button>
+                :
+                <button type='submit' className='btn btn-success w-100 rounded-2'>
+                  Login
+                </button>
+            }
         </form>
         <div className="login-links">
           <Link to="/forgot-password">Forgot Password?</Link><br/>

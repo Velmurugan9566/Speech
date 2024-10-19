@@ -180,7 +180,7 @@ const Cart = () => {
   const user = sessionStorage.getItem('userid') || ''; 
   const [shouldUpdateCart,setShouldUpdateCart] = useState(false);
   const navigate = useNavigate();
-  const [addQuan,setAddQuan] = useState(0)
+  const [addQuan,setAddQuan] = useState(1)
   const [lowStock,setLowStock] = useState(false);
 
   const startListening = () => {
@@ -206,9 +206,9 @@ const Cart = () => {
   const fetchCart = async () => {
     if(user){
     try { 
-      console.log("fetch");
-      const response = await axios.get(`http://localhost:3001/fetchCart/${user}`);
-      console.log(response.data);
+      //console.log("fetch");
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/fetchCart/${user}`);
+      //console.log(response.data);
       setCart(response.data);
     } catch (error) {
       console.error("Error fetching Cart Products:", error);
@@ -218,7 +218,7 @@ const Cart = () => {
   };
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/products");
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
       setProducts(response.data);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -228,12 +228,29 @@ const Cart = () => {
     fetchProducts();
     fetchCart();
   }, []);
+  const handleRemoveItem =(tran)=>{
+    speak("Say yes to remove those products");
+    const lowerTranscript = tran.trim().toLowerCase();
+    if(/yes/.test(lowerTranscript)){
+      cart.forEach(item=>{
+      const original=products.filter(i=>i.proname== item.proname);
+      if(original.length>0){
+        //console.log("original",original)
+        if(original[0].quantity<item.quantity){
+          handleRemoveProduct(original[0].proname)
+        }
+      } })
+      setLowStock(false)
+      resetTranscript();
+      speak("Item removed from your cart. now checkout")
+      return;}
+   }
   useEffect(() => {
     if (!transcript) return;
     const lowerTranscript = transcript.trim().toLowerCase();
   
     // Handling core commands
-    const handleCoreCommands = (transcript) => {
+    const handleCoreCommands = (lowerTranscript) => {
       if (/stop/.test(lowerTranscript)) {
         stopListening();
         return true;
@@ -250,7 +267,7 @@ const Cart = () => {
         navigate("/product");
         return true;
       }
-      if (/print bill/.test(lowerTranscript)) {
+      if (/print/.test(lowerTranscript)) {
         resetTranscript();
         if(cart.length >0){
           generatePDF(cart);
@@ -260,12 +277,15 @@ const Cart = () => {
         }
         return true;
       }
-      if (/checkout/.test(lowerTranscript)) {
+      if (/check out/.test(lowerTranscript)) {
         resetTranscript();
-        checkOut()
+        if(checkOut()){
+          setLowStock(true);
+          handleRemoveItem(lowerTranscript);
+        }
         return true;
       }
-      if (/preview cart/.test(lowerTranscript)) {
+      if (/preview/.test(lowerTranscript)) {
         resetTranscript();
         previewCart()
       }
@@ -273,7 +293,7 @@ const Cart = () => {
     };
   
     // Check for core commands first
-    if (handleCoreCommands(transcript)) return;
+    if (handleCoreCommands(lowerTranscript)) return;
   
     // Back command to go back to the previous step
     if (/back/.test(lowerTranscript)) {
@@ -294,7 +314,7 @@ const Cart = () => {
   
     if (lowerTranscript === "remove") {
       setCommand("remove");
-      speak("Please say the product name to remove.");
+      speak("Please say the the product name to remove.");
       setWaitingForProductName(true);
       resetTranscript();
       return;
@@ -313,7 +333,7 @@ const Cart = () => {
     const handleProductInput = (productName) => {
       //console.log("from fun",productName)
 
-      const matchingProducts = findSimilarProducts(productName,addQuan);
+      const matchingProducts = findSimilarProducts(productName);
       if (matchingProducts.length === 0) {
         speak("Product not available. Please say the product name again.");
       } else if (matchingProducts.length === 1) {
@@ -332,7 +352,7 @@ const Cart = () => {
     // Handle quantity input, validate, and add to cart
     const handleQuantityInput = (quantity) => {
       const parsedQuantity = parseInt(quantity);
-  
+      
       if (isNaN(parsedQuantity) || parsedQuantity < 0) {
         speak('Invalid quantity. Please say the quantity again.');
         resetTranscript();
@@ -352,31 +372,18 @@ const Cart = () => {
       }
       
     };
-   const handleRemoveItem =(tran)=>{
-    const lowerTranscript = tran.trim().toLowerCase();
-    if(/yes/.test(lowerTranscript)){
-      setLowStock(false)
-      resetTranscript();
-      speak("Item removed from your cart. now checkout")
-      return;
-      
-    }else {
-      setLowStock(false)
-      resetTranscript();
-      speak("Item removed from your cart. now checkout")
-      return;
-    }
-   }
+   
     // Waiting for the product name to add or remove items
     if (waitingForProductName) {
       const timer = setTimeout(() => {
         if (command === "remove") {
-          const matchingProducts = findSimilarProducts(transcript);
+          const matchingProducts = findSimilarProducts(transcript,addQuan);
           if (matchingProducts.length === 0) {
             speak("Product not found. Please try again.");
           } else if (matchingProducts.length === 1) {
-            handleRemoveProduct(matchingProducts[0]);
-            speak(`${matchingProducts[0]} removed from your cart.`);
+            //console.log("matching products",matchingProducts[0].proname)
+            handleRemoveProduct(matchingProducts[0].proname);
+            speak(`${matchingProducts[0].proname} removed from your cart.`);
           } else {
             speak(`We found multiple matches: ${matchingProducts.join(", ")}. Please select one.`);
           }
@@ -389,9 +396,11 @@ const Cart = () => {
       return () => clearTimeout(timer);
     }
     if(lowStock){
+      console.log("inside")
+      speak("Say yes to remove those products");
       const timer = setTimeout(() => {
         handleRemoveItem(transcript);
-      }, 3000);
+      }, 2000);
       return () => clearTimeout(timer);
     }
     // Waiting for the quantity to add to cart
@@ -410,7 +419,7 @@ const Cart = () => {
   
     return () => clearTimeout(timer);
   
-  }, [transcript,lowStock]);
+  }, [transcript,lowStock,waitingForQuantity,waitingForProductName]);
   
   // Helper function to find similar products
   const findSimilarProducts = (productName,q=0) => {
@@ -475,7 +484,7 @@ const handleRemoveProduct = async (input) => {
     const matchedProducts = cart.filter(p => p.proname.toLowerCase().includes(productName));
 
     if (matchedProducts.length === 1) {
-      const response = await axios.get(`http://localhost:3001/product/${matchedProducts[0]._id}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/${matchedProducts[0]._id}`);
       const product = response.data;
       const parsedQuantity = parseInt(quantity);
 
@@ -522,13 +531,13 @@ function UpdateCartItem(){
   if(user){
     const email =user;
     const status =2;
-    console.log("before send",cart)
-    axios.put('http://localhost:3001/updateCart',{cart,email,status})
+    //console.log("before send",cart)
+    axios.put(`${import.meta.env.VITE_API_URL}/updateCart`,{cart,email,status})
     .then(msg =>console.log(msg))
     .catch(err=>console.log(err))
   }else{
    sessionStorage.setItem('cart', JSON.stringify(cart));
-   console.log("session Cart",JSON.parse(sessionStorage.getItem('cart')))
+   //console.log("session Cart",JSON.parse(sessionStorage.getItem('cart')))
   }    
 };
 
@@ -555,7 +564,7 @@ function UpdateCartItem(){
     updatedCart[existingProductIndex] = existingProduct;
     
     setCart(updatedCart);
-    console.log("Cart first update",cart);
+    //console.log("Cart first update",cart);
     setShouldUpdateCart(true);
     setCommand("");
     setWaitingForProductName(false);
@@ -571,7 +580,7 @@ function UpdateCartItem(){
     };
     
     setCart([...cart, cartItem]);
-    console.log("Cart",cart);
+    //console.log("Cart",cart);
     setShouldUpdateCart(true);
       setCommand("");
       setWaitingForProductName(false);
@@ -580,7 +589,7 @@ function UpdateCartItem(){
     toast(`${quantity} of ${product.proname} has been added to your cart with a total price of Rs.${cartItem.totalPrice}.`)
     speak(`${quantity} of ${product.proname} has been added to your cart with a total price of Rupees.${cartItem.totalPrice}.`);
   }
-    // //const response = axios.get(`http://localhost:3001/product/${productName}`);
+    // //const response = axios.get(`${import.meta.env.VITE_API_URL}/product/${productName}`);
     // const matchedProducts = products.filter(item => item.proname === productitem.proname);
     //   // const quantityMatch = quantity.match(/\d+/);
     //   // console.log(quantityMatch +"quantitymatch")
@@ -659,22 +668,22 @@ function UpdateCartItem(){
       return 1;
     }
     existingProduct.quantity += change;
-    console.log((parseFloat(existingProduct.totalPrice) + additionalPrice).toFixed(2))
+    //console.log((parseFloat(existingProduct.totalPrice) + additionalPrice).toFixed(2))
     existingProduct.totalPrice = (parseFloat(existingProduct.totalPrice) + additionalPrice).toFixed(2);
     updatedCart[existingProductIndex] = existingProduct;
-    console.log(existingProduct)
+    //console.log(existingProduct)
     setCart(updatedCart);
     setShouldUpdateCart(true);
      }
     }
 
 const removeItemFromCart=(n)=>{
-    console.log("before",cart);
+    //console.log("before",cart);
     if(user){
       const email =user;
       const status =2;
-      console.log("before send",cart)
-      axios.delete('http://localhost:3001/deleteCart', { 
+      //console.log("before send",cart)
+      axios.delete(`${import.meta.env.VITE_API_URL}/deleteCart`, { 
         params: {
             email: email,
             n: n
@@ -699,10 +708,11 @@ const removeItemFromCart=(n)=>{
        if(user){
         fetchProducts();
         const flag = hasLowStock
-        console.log(flag)
+        //console.log(flag)
         if(flag){
           speak("Some products has out of stock. so please remove first.")
           setLowStock(true);
+          return 1
         }else{
            speak("Navigating to CheckOut page..")
          navigate('/Checkout')
@@ -713,10 +723,12 @@ const removeItemFromCart=(n)=>{
        }
   }
   function previewCart(){
+   
       if(cart.length>0){
+        //console.log("cart",cart)
         speak(`Total products in your cart is ${cart.length}`);
-        for(item in cart){
-           speak(`${item.quantity} item of ${item.proname} Total price is ${item.totalPrice}.`)
+        for(let item in cart){
+           speak(`${cart[item].quantity} item of ${cart[item].proname} Total price is ${cart[item].totalPrice}.`)
         }
         speak(`And the total amount of these items is Rupees. ${cart.reduce((acc, item) => acc + parseFloat(item.totalPrice), 0).toFixed(2)}`)
       }else{
@@ -726,14 +738,14 @@ const removeItemFromCart=(n)=>{
   }
   const hasLowStock = cart.some(item => {
     const productInStock = products.find(prod => prod.proname === item.proname);
-    console.log("pro",productInStock);
+    //console.log("pro",productInStock);
     return productInStock && item.quantity > productInStock.quantity;
   });
   //console.log(products);
   function handleCartQuantity(item){
     const original=products.filter(i=>i.proname== item.proname);
     if(original.length>0){
-      console.log("original",original)
+      //console.log("original",original)
       if(original[0].quantity<item.quantity){
         return true
       }

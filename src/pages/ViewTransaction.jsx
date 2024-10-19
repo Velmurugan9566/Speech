@@ -17,62 +17,50 @@ function ViewTransaction() {
     const [month, setMonth] = useState('');
     const [monthlyRevenue, setMonthlyRevenue] = useState([]);
     const [frequentItems, setFrequentItems] = useState([]);
-    const [loading, setLoading] = useState(true); // Add a loading state
+    const [loading, setLoading] = useState(true); 
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-const [isAsideOpen, setIsAsideOpen] = useState(window.innerWidth > 768); // Initially set based on screen size
+const [isAsideOpen, setIsAsideOpen] = useState(window.innerWidth > 768); 
 
-// Detect window resize and toggle between mobile and desktop views
+
 const handleResize = () => {
   const isNowMobile = window.innerWidth <= 768;
   setIsMobile(isNowMobile);
-  
-  // Automatically set aside state based on the current window size
-  setIsAsideOpen(!isNowMobile); // Show aside if it's not mobile
+  setIsAsideOpen(!isNowMobile);
 };
-
 useEffect(() => {
-  // Run on component mount to check initial screen size
   handleResize();
-
-  // Add resize listener
   window.addEventListener('resize', handleResize);
-
-  // Cleanup listener on component unmount
   return () => {
     window.removeEventListener('resize', handleResize);
   };
 }, []);
-
 const toggleAside = () => {
   setIsAsideOpen((prev) => !prev);
 };
-
-
-    // Fetch orders and date range together
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const [ordersRes, dateRangeRes] = await Promise.all([
-                    axios.get('http://localhost:3001/FetchOrders'),
-                    axios.get('http://localhost:3001/FetchOrders'),
+                    axios.get(`${import.meta.env.VITE_API_URL}/FetchOrders`),
+                    axios.get(`${import.meta.env.VITE_API_URL}/FetchOrders`),
                 ]);
                 setOrders(ordersRes.data);
                 setMinDate(dateRangeRes.data.minDate);
                 setMaxDate(dateRangeRes.data.maxDate);
-                setLoading(false); // Stop loading after data fetch
+                setLoading(false); 
             } catch (error) {
                 console.error("Error fetching data:", error);
                 toast.error("Error fetching transaction data.");
             }
         };
         fetchData();
-        getFrequentItems(); // Fetch frequent items initially
+        getFrequentItems(); 
     }, []);
 
-    // Fetch frequent items
+
     const getFrequentItems = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/FrequentItems');
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/FrequentItems`);
             setFrequentItems(response.data);
         } catch (error) {
             console.error("Error fetching frequent items:", error);
@@ -80,14 +68,13 @@ const toggleAside = () => {
         }
     };
 
-    // Filter orders by date range
     const handleFilter = async () => {
         if (!startDate || !endDate) {
             toast.warn("Please select both start and end dates.");
             return;
         }
         try {
-            const response = await axios.get('http://localhost:3001/FilterOrder', {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/FilterOrder`, {
                 params: { startDate, endDate }
             });
             setOrders(response.data);
@@ -100,7 +87,7 @@ const toggleAside = () => {
     const handleMonthChange = async (e) => {
         setMonth(e.target.value);
         try {
-            const response = await axios.get('http://localhost:3001/RevenueOrder', { 
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/RevenueOrder`, { 
                 params: { month: e.target.value } 
             });
             const data = response.data;
@@ -114,7 +101,7 @@ const toggleAside = () => {
             }
         } catch (error) {
             console.error("Error fetching monthly revenue:", error);
-            setMonthlyRevenue([]); // Fallback to empty array if there's an error
+            setMonthlyRevenue([]); 
         }
     };
      
@@ -185,8 +172,6 @@ const toggleAside = () => {
                  {!isMobile && isAsideOpen &&<aside className="tra-sidebar">
                          <Aside />
                     </aside>}
-  
-                
 
                 <div className="tra-main-content">
                 {!isMobile && isAsideOpen &&  <header className="tra-header">View Transactions</header>}

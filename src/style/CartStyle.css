@@ -1,4 +1,4 @@
-/* Main Container */
+
 .pro-main-container {
   min-height: 100vh;
   padding: 20px;
@@ -62,7 +62,6 @@
   background-color: #218838;
 }
 
-/* Quantity Control */
 .pro-quantity-control {
   display: flex;
   align-items: center;
@@ -80,16 +79,25 @@
   margin: 0 5px;
 }
 
-/* Total Amount Section */
 .pro-total-amount {
   text-align: center;
   font-size: 18px;
+  justify-content: space-evenly;
   margin-bottom: 20px;
 }
 
-/* Print Button Animation */
 .pro-print-btn {
   padding: 10px 20px;
+  background: linear-gradient(90deg, #faef2a, #eb114f);
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  animation: pulse 1.5s infinite;
+}
+.pro-checkout-btn{
+  padding-left: 20px;
+ 
   background: linear-gradient(90deg, #faef2a, #eb114f);
   color: white;
   border: none;
@@ -113,7 +121,6 @@
   }
 }
 
-/* Remove Button */
 .pro-remove-btn {
   padding: 5px 8px;
   background-color: #dc3545;
@@ -127,7 +134,7 @@
   background-color: #c82333;
 }
 
-/* Responsive Styles */
+
 @media (max-width: 768px) {
   .pro-transcript-box,
   .pro-search-box {

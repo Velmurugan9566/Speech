@@ -15,7 +15,7 @@ function BillDetails() {
     if (!user || !cart || !orderId) {
       navigate('/checkout');
     }
-  }, [user, cart, orderId, navigate]);
+  }, [user, cart, orderId]);
 const timer = setTimeout(() => {
     setShowPopup(false);
 }, 8000);
@@ -91,6 +91,7 @@ timer;
       </table>
 
       <div className="bill-actions">
+        <button className='bill-home' onClick={(e)=>navigate('/')}>Back to Home</button>
         <button className="bill-print-button" onClick={handlePrint}>Print Bill</button>
         <Popup showPopup={showPopup} /> {/* Popup for success message */}
       </div>

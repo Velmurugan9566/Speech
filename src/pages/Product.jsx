@@ -5,7 +5,7 @@ import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognitio
 import Header from './UserHeader'
 import '../style/Productpage.css'
 import { Link, useNavigate } from 'react-router-dom';
-import { FaUser, FaShoppingCart,FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
+import { FaUser, FaShoppingCart,FaMicrophone, FaMicrophoneSlash,FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 
 function App() {
@@ -29,7 +29,7 @@ function App() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/categories');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/categories`);
         setCategories(response.data);
         speakCategories(response.data);
       } catch (error) {
@@ -43,7 +43,7 @@ function App() {
       if(user){
       try { 
         console.log("fetch");
-        const response = await axios.get(`http://localhost:3001/fetchCart/${user}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/fetchCart/${user}`);
         console.log(response.data);
         setCart(response.data);
       } catch (error) {
@@ -55,6 +55,8 @@ function App() {
     fetchCart();
   }, []);
 
+  
+
   useEffect(() => {
     // Stop speaking when navigating to a new page
     return () => {
@@ -63,7 +65,7 @@ function App() {
   }, []);
   const fetchSubcategories = async (category) => {
     try {
-      const response = await axios.get(`http://localhost:3001/subcategories/${category}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/subcategories/${category}`);
       setSubcategories(response.data);
       speakSubcategories(response.data);
     } catch (error) {
@@ -74,7 +76,7 @@ function App() {
 
   const fetchProducts = async (subcategory) => {
     try {
-      const response = await axios.get(`http://localhost:3001/products/${subcategory}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/products/${subcategory}`);
       setProducts(response.data);
       speakProducts(response.data);
     } catch (error) {
@@ -95,7 +97,7 @@ function App() {
         const email =user;
         const status =2;
         console.log("before send",cart)
-        axios.put('http://localhost:3001/updateCart',{cart,email,status})
+        axios.put(`${import.meta.env.VITE_API_URL}/updateCart`,{cart,email,status})
         .then(msg =>console.log(msg))
         .catch(err=>console.log(err))
       }else{
@@ -384,7 +386,22 @@ const addToCart = (product, quantity) => {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-  
+  function HandleNavigation(n){
+    if(n==-1){
+     if (currentStep === "product") {
+       setSelectedSubcategory("");
+       setCurrentStep("subcategory");
+       speakSubcategories(subcategories);
+     } else if (currentStep === "subcategory") {
+       setSelectedCategory("");
+       setCurrentStep("category");
+       speakCategories(categories);
+     }else if (currentStep === "quantity") {
+       setCurrentStep("product");
+       speakProducts(products);
+     }
+    }
+   }
 console.log(cart)
   return (
   <div>
@@ -395,6 +412,7 @@ console.log(cart)
         />
               <ToastContainer />
         <div className='pro-main-container'>
+       
     <button onClick={toggleSidebar} className='pro-toggle-btn'>X</button>
 
    <div className={`pro-sidebar ${sidebarOpen ? 'show' : ''}`}>
@@ -415,8 +433,12 @@ console.log(cart)
 
   
   <div className="pro-content">
-    {/* Your existing content code goes here */}
-  
+   
+    <div className="navigation-arrows">
+          <button onClick={(e)=>HandleNavigation(-1)} disabled={false}>
+            <FaArrowLeft />
+          </button>
+        </div>
     <div className="hp-textbox"> <input type='text' className='textp' placeholder='Tell Explore or Order...' value={transcript} readOnly></input><div className='svg'><FaMicrophone /></div> </div>
          
         <div className="oro-content">
@@ -506,14 +528,37 @@ console.log(cart)
         </div>
         
         <div className="pro-cart-section">
-          <h2 className="pro-section-title">Cart</h2>
-          <ul className="pro-cart-list">
+        
+         {cart.length>0 ? (
+          <>
+            <h2 className="pro-section-title">Cart</h2>
+            <table className='cart-table'>
+              <thead>
+                <tr>
+                <th>
+                S.No
+                </th>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                </tr>
+                              </thead>
+           <tbody>
             {cart.map((item, index) => (
-              <li key={index}>
-                {item.proname} - ${item.price} - Quantity: {item.quantity} = Total Price {item.totalPrice}
-              </li>
+              <tr>
+                <td>{index+1}</td><td>{item.proname}</td><td>Rs.{item.price}</td><td>{item.quantity}</td><td>{item.totalPrice}</td>
+              
+              </tr>
             ))}
-          </ul>
+            </tbody>
+          </table>
+          <button className='pro-btn' onClick={(e)=>navigate('/cart')}> Go to Cart</button>
+          </>
+         ):(
+        null
+         )}
+        
         </div>
         </div>
       </div>

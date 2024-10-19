@@ -41,7 +41,7 @@ function Admin() {
     if (email.length !== 0) {
       if (password.length !== 0) {
         setLoading(true);
-        axios.get('http://localhost:3001/Alogin', {
+        axios.get(`${import.meta.env.VITE_API_URL}/Alogin`, {
           params: { u: email, pass: password }
         })
           .then(res => {
@@ -58,7 +58,7 @@ function Admin() {
           })
           .catch(err => { 
             setLoading(false);
-            toast.error('Please connect internet..');
+            toast.error('Admin ID not found..');
             console.log(err);
           });
       } else {

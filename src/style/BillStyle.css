@@ -29,6 +29,8 @@
   
   .bill-actions {
     text-align: center;
+    justify-content: space-around;
+    display: flex;
   }
   
   .bill-print-button {
@@ -38,8 +40,15 @@
     border: none;
     cursor: pointer;
   }
+  .bill-home{
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
   
-  .bill-print-button:hover {
+  .bill-print-button:hover .bill-home:hover{
     background-color: #0056b3;
   }
   

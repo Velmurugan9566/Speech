@@ -53,7 +53,7 @@ const toggleAside = () => {
 
 
   useEffect(() => {
-    axios.get('http://localhost:3001/categorieswithcount')
+    axios.get(`${import.meta.env.VITE_API_URL}/categorieswithcount`)
       .then(res => setCategories(res.data))
       .catch(err => toast.error("Error fetching categories:", err));
     if (state?.selectedCategory) {
@@ -73,7 +73,7 @@ const handleRenameCategory = (oldName) => {
   if (newCategoryName.trim() === '') {
     return toast.error('Category name cannot be empty');
   }
-  axios.put('http://localhost:3001/renamecategory', {
+  axios.put(`${import.meta.env.VITE_API_URL}/renamecategory`, {
     oldName,
     newName: newCategoryName,
   })
@@ -82,7 +82,7 @@ const handleRenameCategory = (oldName) => {
       setRenameMode(null);
       setNewCategoryName('');
       // Refresh categories list to reflect the new name
-      axios.get('http://localhost:3001/categorieswithcount')
+      axios.get(`${import.meta.env.VITE_API_URL}/categorieswithcount`)
         .then(res => setCategories(res.data))
         .catch(err => toast.error("Error fetching categories:", err));
     })
@@ -92,7 +92,7 @@ const handleRenameCategory = (oldName) => {
   
 const handleDeleteSelected = () => {
   if (window.confirm("Are you sure you want to delete the selected products?")) {
-    axios.delete('http://localhost:3001/deleteProducts', { data: { ids: selectedProducts } })
+    axios.delete(`${import.meta.env.VITE_API_URL}/deleteProducts`, { data: { ids: selectedProducts } })
       .then(() => {
         toast.success("Products deleted successfully");
         handleCategoryClick(selectedCategory); // Refresh products list
@@ -104,7 +104,7 @@ const handleDeleteSelected = () => {
   const handleCategoryClick = (category) => {
     console.log("handle cate",category);
     setSelectedCategory(category);
-    axios.get(`http://localhost:3001/AdminProductsView/${category}`)
+    axios.get(`${import.meta.env.VITE_API_URL}/AdminProductsView/${category}`)
       .then(res => setProducts(res.data))
       .catch(err => toast.error("Error fetching products:", err));
   };
@@ -116,10 +116,10 @@ const handleDeleteSelected = () => {
     const toast = useRef(null);
     const accept = () => {
       console.log(delcat)
-      axios.delete('http://localhost:3001/deleteCategory', {data:{category:delcat}})
+      axios.delete(`${import.meta.env.VITE_API_URL}/deleteCategory`, {data:{category:delcat}})
       .then((msg) => {
         toast.current.show({ severity: 'success', summary: 'Success', detail: 'Category and Product Deleted Successfully', life: 3000 });
-        axios.get('http://localhost:3001/categorieswithcount')
+        axios.get(`${import.meta.env.VITE_API_URL}/categorieswithcount`)
         .then(res => setCategories(res.data))
         .catch(err =>{ toast.error("Error fetching categories:")});
       })

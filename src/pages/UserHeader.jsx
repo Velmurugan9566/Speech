@@ -1,71 +1,67 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaProductHunt, FaShoppingCart, FaUser, FaInfoCircle, FaHome, FaArrowLeft, FaArrowRight, FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
+import { FaProductHunt, FaShoppingCart, FaUser, FaInfoCircle, FaHome, FaArrowLeft, FaArrowRight, FaMicrophone, FaMicrophoneSlash, FaBars } from 'react-icons/fa';
 import '../style/UserHeader.css'; 
 
 const Header = ({ isListening, startListening, stopListening }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [history, setHistory] = React.useState([]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleBack = () => {
-    if (history.length > 0) {
-      const lastPage = history[history.length - 1];
-      setHistory(history.slice(0, -1));
-      navigate(lastPage);
+    if (window.history.length > 1) {
+      navigate(-1);  // Go back using browser history
     }
   };
 
-  const handleForward = (path) => {
-    setHistory([...history, location.pathname]);
-    navigate(path);
+  const handleForward = () => {
+    navigate(1);  // Go forward using browser history
   };
 
   return (
     <header className="h-header">
       <div className="h-top-row">
         <div className="h-profile">
-          <FaUser className="h-icon"/>
-         <Link to="/Profile" className='profilelink' onClick={() => handleForward('/Profile')}> Profile</Link>
+          <FaUser className="h-icon" />
+          <Link to="/Profile" className="profilelink">Profile</Link>
           <div className="h-submenu">
-            <Link to="/Admin" onClick={() => handleForward('/Admin')}>Admin</Link>
+            <Link to="/Admin">Admin</Link>
           </div>
         </div>
         <h1 className="h-title">Vel'z Supermarket</h1>
+        <button className="h-menu-btn" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <FaBars />
+        </button>
       </div>
-      <nav className="h-menu">
-      <Link to="/" onClick={() => handleForward('/')}>
-          <FaHome className="h-icon" />
-          Home
+      
+      <nav className={`h-menu ${isMenuOpen ? 'open' : ''}`}>
+        <Link to="/" onClick={() => navigate('/')}>
+          <FaHome className="h-icon" /> Home
         </Link>
-        <Link to="/product" onClick={() => handleForward('/product')}>
-          <FaProductHunt className="h-icon" />
-          Product
+        <Link to="/product" onClick={() => navigate('/product')}>
+          <FaProductHunt className="h-icon" /> Product
         </Link>
-        <Link to="/cart" onClick={() => handleForward('/cart')}>
-          <FaShoppingCart className="h-icon" />
-          Cart
+        <Link to="/cart" onClick={() => navigate('/cart')}>
+          <FaShoppingCart className="h-icon" /> Cart
         </Link>
-        <Link to="/about" onClick={() => handleForward('/about')}>
-          <FaInfoCircle className="h-icon" />
-          About
+        <Link to="/About" onClick={() => navigate('/About')}>
+          <FaInfoCircle className="h-icon" /> About
         </Link>
-        <Link to="/contact" onClick={() => handleForward('/contact')}>
-          <FaInfoCircle className="h-icon" />
-          Contact
+        <Link to="/Contact" onClick={() => navigate('/Contact')}>
+          <FaInfoCircle className="h-icon" /> Contact
         </Link>
-       
       </nav>
+      
       <div className="h-bottom-row">
         <button className="h-voice-btn" onClick={isListening ? stopListening : startListening}>
           {isListening ? <FaMicrophoneSlash /> : <FaMicrophone />}
           {isListening ? 'Stop Listening' : 'Start Listening'}
         </button>
         <div className="h-navigation-arrows">
-          <button onClick={handleBack} disabled={history.length === 0}>
+          <button onClick={handleBack} disabled={window.history.length <= 1}>
             <FaArrowLeft />
           </button>
-          <button onClick={() => navigate(1)} disabled={true}>
+          <button onClick={handleForward}>
             <FaArrowRight />
           </button>
         </div>

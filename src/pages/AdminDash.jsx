@@ -41,12 +41,12 @@ const toggleAside = () => {
 };
 // Fetch low quantity products
   useEffect(() => {
-    axios.get('http://localhost:3001/products_low_quantity')
+    axios.get(`${import.meta.env.VITE_API_URL}/products_low_quantity`)
       .then((response) => setLowQuantityData(response.data))
       .catch((error) => console.log(error));
 
     // Fetch today's transaction data
-    axios.get('http://localhost:3001/transactions/today')
+    axios.get(`${import.meta.env.VITE_API_URL}/transactions/today`)
       .then((response) => setTransactionList(response.data))
       .catch((error) => console.log(error));
   }, []);
@@ -90,16 +90,7 @@ const toggleAside = () => {
 
 <div className={`ap-main-content`}>
   {!isMobile && isAsideOpen && <header className="tra-header">Admin Panel</header>}
-      <section className="ap-stats-section">
-        <div className="ap-stat-box">
-          <h3>Total Website Viewers</h3>
-          <p>12</p>
-        </div>
-        <div className="ap-stat-box">
-          <h3>Total Orders</h3>
-          <p>0</p>
-        </div>
-      </section>
+      
 
       <section className="ap-chart-section">
         <h3>Low Quantity Products</h3>

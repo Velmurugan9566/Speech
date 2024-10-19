@@ -3,7 +3,8 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../style/AddPro.css'; // External CSS file
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Header from './AdminHead'
+import Header from './AdminHead';
+import Aside from './AdminAside'
 import { ToastContainer, toast } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 
@@ -23,9 +24,28 @@ const UpdateProduct = () => {
   const [listcategory, setListcategory] = useState([]);
   const [listSupplier, setListSupplier] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isAsideOpen, setIsAsideOpen] = useState(window.innerWidth > 768); 
+  
+  
+  const handleResize = () => {
+    const isNowMobile = window.innerWidth <= 768;
+    setIsMobile(isNowMobile);
+    setIsAsideOpen(!isNowMobile);
+  };
+  useEffect(() => {
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+  const toggleAside = () => {
+    setIsAsideOpen((prev) => !prev);
+  };
    console.log(id)
   useEffect(() => {
-    axios.get(`http://localhost:3001/getProduct/${id}`)
+    axios.get(`${import.meta.env.VITE_API_URL}/getProduct/${id}`)
       .then(res => {
         //console.log(res.data)
         setFormData(res.data);
@@ -33,7 +53,7 @@ const UpdateProduct = () => {
       .catch(err => toast.error("Error fetching product details:", err));
 
     // Fetch categories
-    axios.get('http://localhost:3001/getCate')
+    axios.get(`${import.meta.env.VITE_API_URL}/getCate`)
       .then(res => {
         const categories = res.data.map(val => val.catename);
         setListcategory(categories);
@@ -41,7 +61,7 @@ const UpdateProduct = () => {
       .catch(err => toast.error(err));
 
     // Fetch suppliers
-    axios.get('http://localhost:3001/getSupp')
+    axios.get(`${import.meta.env.VITE_API_URL}/getSupp`)
       .then(res => {
         const suppliers = res.data.map(val => val.suppname);
         setListSupplier(suppliers);
@@ -49,11 +69,11 @@ const UpdateProduct = () => {
       .catch(err => toast.error(err));
 
     // Fetch subcategories
-    axios.get('http://localhost:3001/getSubcategories')
+    axios.get(`${import.meta.env.VITE_API_URL}/getSubcategories`)
       .then(res => setSubcategories(res.data))
       .catch(err => toast.error("Error fetching subcategories:", err));
 
-  }, [id]);
+  }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -72,7 +92,7 @@ const UpdateProduct = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     console.log("form",formData);
-    axios.put(`http://localhost:3001/updateProduct/${id}`, formData)
+    axios.put(`${import.meta.env.VITE_API_URL}/updateProduct/${id}`, formData)
       .then(msg => {
         toast.success("Product Updated Successfully");
         navigate('/DashBoard/ViewProduct', { state: { selectedCategory: formData.category } }); // Passing selected category
@@ -82,9 +102,12 @@ const UpdateProduct = () => {
   return (
     <div>
       <ToastContainer />
-      <Header/>
+ {isMobile && !isAsideOpen && <Header toggleAside={toggleAside}/>}
+                 {!isMobile && isAsideOpen &&<aside className="tra-sidebar">
+                         <Aside />
+                    </aside>}
 
-      <div className="container">
+      <div className="app-container">
         <form className="product-form" onSubmit={handleSubmit}>
           <div>
             <label>Product Name:</label>
@@ -141,10 +164,6 @@ const UpdateProduct = () => {
           <button type="submit">Update Product</button>
         </form>
       </div>
-
-      <footer className="footer">
-        <p>© 2024 Admin Panel. All rights reserved.</p>
-      </footer>
     </div>
   );
 };

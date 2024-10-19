@@ -20,6 +20,8 @@ import Login from "./pages/UserLogin.jsx"
 import Checkout from "./pages/Checkout.jsx"
 import BillStatement from './pages/BillDetails.jsx';
 import ViewCustomer from './pages/ViewCustomer.jsx'
+import About from './pages/AboutUs.jsx';
+import Contact from './pages/ContactUs.jsx';
 function App() {
   return (
     <>
@@ -41,6 +43,8 @@ function App() {
          <Route path='/Login' element={<Login/>}></Route>
          <Route path='/Checkout' element={<Checkout/>}></Route>
          <Route path='/bill' element={<BillStatement />}></Route>
+         <Route path='/About' element={<About/>} ></Route>
+         <Route path='/Contact' element={<Contact/>}></Route>
       </Routes>
       </BrowserRouter>
 

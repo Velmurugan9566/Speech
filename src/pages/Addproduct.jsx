@@ -29,25 +29,25 @@ const AdminProductForm = () => {
   const [subcategories, setSubcategories] = useState([]);
   const [load, setLoad] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-const [isAsideOpen, setIsAsideOpen] = useState(window.innerWidth > 768); // Initially set based on screen size
+const [isAsideOpen, setIsAsideOpen] = useState(window.innerWidth > 768); 
 
-// Detect window resize and toggle between mobile and desktop views
+
 const handleResize = () => {
   const isNowMobile = window.innerWidth <= 768;
   setIsMobile(isNowMobile);
   
-  // Automatically set aside state based on the current window size
-  setIsAsideOpen(!isNowMobile); // Show aside if it's not mobile
+ 
+  setIsAsideOpen(!isNowMobile); 
 };
 
 useEffect(() => {
-  // Run on component mount to check initial screen size
+  
   handleResize();
 
-  // Add resize listener
+  
   window.addEventListener('resize', handleResize);
 
-  // Cleanup listener on component unmount
+  
   return () => {
     window.removeEventListener('resize', handleResize);
   };
@@ -60,11 +60,11 @@ const toggleAside = () => {
   useEffect(() => {
     setnewcate("");
     setnewSupp("");
-    axios.get('http://localhost:3001/getSubcategories')
+    axios.get(`${import.meta.env.VITE_API_URL}/getSubcategories`)
       .then(res => setSubcategories(res.data))
       .catch(err => toast.error("Error fetching subcategories:", err));
     // Fetch categories
-    axios.get('http://localhost:3001/getCate')
+    axios.get(`${import.meta.env.VITE_API_URL}/getCate`)
       .then(res => {
         const categories = res.data.map(val => val.catename);
         setListcategory(categories);
@@ -72,7 +72,7 @@ const toggleAside = () => {
       .catch(err => toast.error(err));
 
     // Fetch suppliers
-    axios.get('http://localhost:3001/getSupp')
+    axios.get(`${import.meta.env.VITE_API_URL}/getSupp`)
       .then(res => {
         const suppliers = res.data.map(val => val.suppname);
         setListSupplier(suppliers);
@@ -91,7 +91,7 @@ const toggleAside = () => {
     if (!formData.category) validationErrors.category = 'Category is required';
     if (!formData.Subcategory) validationErrors.Subcategory = 'Sub Category is required';
     if (!formData.supp_id) validationErrors.supp_id = 'Supplier Id is required';
-    if (!formData.discount || isNaN(formData.discount) || formData.discount < 0) {
+    if (!formData.discount || isNaN(formData.discount) || formData.discount < 0 || formData.discount >100) {
       validationErrors.discount = 'Discount is required';
     }
     return validationErrors;
@@ -106,7 +106,7 @@ const toggleAside = () => {
     } else {
       setErrors({});
       console.log(formData);
-      axios.post('http://localhost:3001/AddPro', { formData })
+      axios.post(`${import.meta.env.VITE_API_URL}/AddPro`, { formData })
         .then(msg => {
               if(msg.data.status == 1){
                 toast.success("Product Added Successfully")
@@ -135,7 +135,7 @@ const toggleAside = () => {
       toast.warning("enter the valid name")
     }
     else {
-      axios.post('http://localhost:3001/Addcate', { cate: newcate.toLowerCase(), id: newcateid })
+      axios.post(`${import.meta.env.VITE_API_URL}/Addcate`, { cate: newcate.toLowerCase(), id: newcateid })
         .then(res => {
           console.log(res)
           if (res.data.status == 1) {
@@ -156,7 +156,7 @@ const toggleAside = () => {
       toast.warning("enter the valid name")
     }
     else {
-      axios.post('http://localhost:3001/Addsupp', { suppname: newSupp.toLowerCase(), suppid: newSuppid })
+      axios.post(`${import.meta.env.VITE_API_URL}/Addsupp`, { suppname: newSupp.toLowerCase(), suppid: newSuppid })
         .then(res => {
           console.log(res)
           if (res.data.status == 1) {
@@ -189,7 +189,7 @@ const toggleAside = () => {
         alert('Invalid data in Excel file.');
         return;
       }else{
-        axios.post('http://localhost:3001/AddBulkPro',{jsonData})
+        axios.post(`${import.meta.env.VITE_API_URL}/AddBulkPro`,{jsonData})
         .then(msg=>{
              if(msg.data.status==1){
               toast.success("All products are inserted Successfully.")

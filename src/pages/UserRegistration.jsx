@@ -10,6 +10,7 @@ import Spinner from 'react-bootstrap/Spinner';
 
 const RegistrationForm = () => {
   const [isListening, setIsListening] = useState(false);
+  const [load,setLoad] =useState(false)
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -84,7 +85,7 @@ const RegistrationForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setErrorMessage('');
-
+    setLoad(true);
     // Perform validation before submission
     const valid = validateForm();
 
@@ -101,7 +102,7 @@ const RegistrationForm = () => {
       
         axios.post('http://localhost:3001/register', userData)
         .then(response=>{
-
+           setLoad(false)
           console.log(response.data)
           if (response.data.status == 3) {
             toast.success("Registration Successful..")
@@ -115,10 +116,12 @@ const RegistrationForm = () => {
           }
         })
         .catch(err=>{
+          setLoad(false)
           toast.warning("Server error..")
           setErrorMessage(err.response.data.message); // Display the error message from se
         })
     } else {
+      setLoad(false);
       setErrorMessage('Please correct the highlighted errors.');
     }
   };
@@ -243,8 +246,18 @@ const RegistrationForm = () => {
               {errors.confirmPassword && <p className="error-message">{errors.confirmPassword}</p>}
 
               {errorMessage && <p className="error-message">{errorMessage}</p>}
-
-              <button type="submit">Register</button>
+              {
+              load ?
+                <button className='btn btn-success w-100 rounded-2'>
+                  <Spinner animation='border' variant='light'>
+                  </Spinner>
+                </button>
+                :
+                <button type='submit' className='btn btn-success w-100 rounded-2'>
+                  Register
+                </button>
+            }
+              
               Already have an account<Link to='/Login'>Login</Link>
             </form>
           </div>

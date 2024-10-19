@@ -9,7 +9,22 @@
   position: relative;
   color: #003d1c;
 }
-
+.navigation-arrows{
+  position: relative;
+  display: flex;
+  gap: 10px;
+  
+  bottom: 10px;
+  left: 10px;
+  
+}
+.navigation-arrows button{
+  background:none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
 /* Content */
 .pro-content {
   text-align: center;
@@ -21,6 +36,7 @@
   margin-bottom: 20px;
   font-size: 24px;
   font-weight: bold;
+
 }
 
 /* Category List */
@@ -111,15 +127,15 @@
 
 /* Cart Section */
 .pro-cart-section {
+  align-items: center;
+  justify-content:space-evenly;
+  display:grid;
   margin-top: 20px;
 }
 
 /* Cart List */
-.pro-cart-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 auto;
-  max-width: 600px;
+.cart-table {
+padding-left: 20px;
 }
 
 /* Transcript Box */
